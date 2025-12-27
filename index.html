@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stratego - Club de Oficiales</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/lobby.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Encabezado -->
+        <header class="app-header">
+            <h1>🪖 Stratego - Club de Oficiales</h1>
+            <div class="user-info">
+                <span id="username">General Anónimo</span>
+                <button id="logout-btn">Salir</button>
+            </div>
+        </header>
+
+        <!-- Contenido Principal -->
+        <main class="lobby-container">
+            <!-- Panel de Jugadores Conectados -->
+            <section class="players-panel">
+                <h2>🟢 Oficiales Conectados</h2>
+                <div class="players-list" id="players-list">
+                    <!-- Lista dinámica de jugadores -->
+                </div>
+                
+                <div class="actions">
+                    <button id="pve-btn" class="btn-primary">
+                        🎮 Entrenamiento PvE
+                    </button>
+                    <div class="pve-options hidden" id="pve-options">
+                        <select id="pve-mode">
+                            <option value="classic">Guerra Clásica (40 piezas)</option>
+                            <option value="quick">Duelo Rápido (10 piezas)</option>
+                        </select>
+                        <button id="start-pve">Iniciar Entrenamiento</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Chat Global -->
+            <section class="chat-panel">
+                <h2>💬 Comunicaciones Globales</h2>
+                <div class="chat-messages" id="chat-messages">
+                    <!-- Mensajes del chat -->
+                </div>
+                <div class="chat-input">
+                    <input type="text" id="message-input" 
+                           placeholder="Escribe tu mensaje o desafío...">
+                    <button id="send-message">Enviar</button>
+                </div>
+                
+                <div class="protocol-indicator">
+                    <span>Protocolo Actual: </span>
+                    <span id="protocol-display">WebSocket Activo</span>
+                </div>
+            </section>
+        </main>
+
+        <!-- Modal de Desafío (se muestra cuando se selecciona un jugador) -->
+        <div id="challenge-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>🎯 Desafiar a <span id="opponent-name"></span></h2>
+                <div class="challenge-options">
+                    <label>
+                        <input type="radio" name="game-mode" value="classic" checked>
+                        Guerra Clásica (40 piezas)
+                    </label>
+                    <label>
+                        <input type="radio" name="game-mode" value="quick">
+                        Duelo Rápido (10 piezas)
+                    </label>
+                </div>
+                <div class="modal-footer">
+                    <button id="send-challenge" class="btn-primary">
+                        Enviar Desafío
+                    </button>
+                    <button id="cancel-challenge" class="btn-secondary">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Desafío Recibido -->
+        <div id="incoming-challenge-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>⚔️ Desafío Recibido</h2>
+                <p>De: <strong id="challenger-name"></strong></p>
+                <p>Modo: <span id="challenge-mode"></span></p>
+                <p>Protocolo: <code id="challenge-protocol"></code></p>
+                <div class="modal-footer">
+                    <button id="accept-challenge" class="btn-success">
+                        ✅ Aceptar
+                    </button>
+                    <button id="reject-challenge" class="btn-danger">
+                        ❌ Rechazar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Indicador de conexión -->
+        <div class="connection-status" id="connection-status">
+            <span class="status-dot connected"></span>
+            <span>Conectado</span>
+        </div>
+    </div>
+
+    <script src="js/communication.js"></script>
+    <script src="js/lobby.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
