@@ -9,28 +9,22 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Encabezado -->
         <header class="app-header">
             <h1>🪖 Stratego - Club de Oficiales</h1>
-            <div class="user-info">
+            <nav class="user-info">
                 <span id="username">General Anónimo</span>
-                <button id="logout-btn">Salir</button>
-            </div>
+                <button id="logout-btn" class="btn-exit">Salir</button>
+            </nav>
         </header>
 
-        <!-- Contenido Principal -->
         <main class="lobby-container">
-            <!-- Panel de Jugadores Conectados -->
-            <section class="players-panel">
+            <aside class="players-panel">
                 <h2>🟢 Oficiales Conectados</h2>
-                <div class="players-list" id="players-list">
-                    <!-- Lista dinámica de jugadores -->
-                </div>
+                <ul class="players-list" id="players-list">
+                    </ul>
                 
-                <div class="actions">
-                    <button id="pve-btn" class="btn-primary">
-                        🎮 Entrenamiento PvE
-                    </button>
+                <footer class="actions">
+                    <button id="pve-btn" class="btn-primary">🎮 Entrenamiento PvE</button>
                     <div class="pve-options hidden" id="pve-options">
                         <select id="pve-mode">
                             <option value="classic">Guerra Clásica (40 piezas)</option>
@@ -38,76 +32,49 @@
                         </select>
                         <button id="start-pve">Iniciar Entrenamiento</button>
                     </div>
-                </div>
-            </section>
+                </footer>
+            </aside>
 
-            <!-- Chat Global -->
             <section class="chat-panel">
                 <h2>💬 Comunicaciones Globales</h2>
-                <div class="chat-messages" id="chat-messages">
-                    <!-- Mensajes del chat -->
-                </div>
-                <div class="chat-input">
-                    <input type="text" id="message-input" 
-                           placeholder="Escribe tu mensaje o desafío...">
-                    <button id="send-message">Enviar</button>
-                </div>
+                <article class="chat-box">
+                    <div class="chat-messages" id="chat-messages" role="log">
+                        </div>
+                    <form class="chat-input" id="chat-form" onsubmit="return false;">
+                        <input type="text" id="message-input" placeholder="Escribe tu mensaje o desafío..." aria-label="Mensaje de chat">
+                        <button type="submit" id="send-message">Enviar</button>
+                    </form>
+                </article>
                 
-                <div class="protocol-indicator">
-                    <span>Protocolo Actual: </span>
-                    <span id="protocol-display">WebSocket Activo</span>
-                </div>
+                <footer class="protocol-indicator">
+                    <p>Protocolo Actual: <strong id="protocol-display">WebSocket Activo</strong></p>
+                </footer>
             </section>
         </main>
 
-        <!-- Modal de Desafío (se muestra cuando se selecciona un jugador) -->
-        <div id="challenge-modal" class="modal hidden">
+        <section id="challenge-modal" class="modal hidden" role="dialog" aria-labelledby="modal-title">
             <div class="modal-content">
-                <h2>🎯 Desafiar a <span id="opponent-name"></span></h2>
-                <div class="challenge-options">
+                <h2 id="modal-title">🎯 Desafiar a <span id="opponent-name"></span></h2>
+                <fieldset class="challenge-options">
+                    <legend>Selecciona la modalidad:</legend>
                     <label>
-                        <input type="radio" name="game-mode" value="classic" checked>
-                        Guerra Clásica (40 piezas)
+                        <input type="radio" name="game-mode" value="classic" checked> Guerra Clásica (40 piezas)
                     </label>
                     <label>
-                        <input type="radio" name="game-mode" value="quick">
-                        Duelo Rápido (10 piezas)
+                        <input type="radio" name="game-mode" value="quick"> Duelo Rápido (10 piezas)
                     </label>
-                </div>
-                <div class="modal-footer">
-                    <button id="send-challenge" class="btn-primary">
-                        Enviar Desafío
-                    </button>
-                    <button id="cancel-challenge" class="btn-secondary">
-                        Cancelar
-                    </button>
-                </div>
+                </fieldset>
+                <footer class="modal-footer">
+                    <button id="send-challenge" class="btn-primary">Enviar Desafío</button>
+                    <button id="cancel-challenge" class="btn-secondary">Cancelar</button>
+                </footer>
             </div>
-        </div>
+        </section>
 
-        <!-- Modal de Desafío Recibido -->
-        <div id="incoming-challenge-modal" class="modal hidden">
-            <div class="modal-content">
-                <h2>⚔️ Desafío Recibido</h2>
-                <p>De: <strong id="challenger-name"></strong></p>
-                <p>Modo: <span id="challenge-mode"></span></p>
-                <p>Protocolo: <code id="challenge-protocol"></code></p>
-                <div class="modal-footer">
-                    <button id="accept-challenge" class="btn-success">
-                        ✅ Aceptar
-                    </button>
-                    <button id="reject-challenge" class="btn-danger">
-                        ❌ Rechazar
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Indicador de conexión -->
-        <div class="connection-status" id="connection-status">
+        <footer class="connection-status" id="connection-status">
             <span class="status-dot connected"></span>
             <span>Conectado</span>
-        </div>
+        </footer>
     </div>
 
     <script src="js/communication.js"></script>

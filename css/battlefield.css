@@ -1,0 +1,186 @@
+:root {
+    --bg-dark: #0f0f1e;
+    --bg-medium: #1a1a2e;
+    --bg-light: #16213e;
+    --accent-enemy: #e94560;
+    --accent-player: #4cd137;
+    --lake-blue: #22a6b3;
+    --text-main: #e2e2e2;
+    --cell-size: 60px;
+    --border-radius: 8px;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    height: 100vh;
+}
+
+.battle-scene-wrapper {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    height: 100vh;
+    padding: 1rem;
+    box-sizing: border-box;
+    gap: 1rem;
+}
+
+/* CABECERA */
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-light);
+    padding: 12px 30px;
+    border-radius: 10px;
+    border-bottom: 4px solid var(--accent-enemy);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.player-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.enemy-avatar {
+    width: 45px;
+    height: 45px;
+    background-color: #2d3436;
+    border: 2px solid var(--accent-enemy);
+    border-radius: 50%;
+}
+
+.enemy-name {
+    margin: 0;
+    font-size: 1rem;
+    letter-spacing: 1px;
+}
+
+.timer-label {
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    opacity: 0.7;
+}
+
+.timer-value {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: var(--accent-player);
+}
+
+.counter-num {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* ÁREA DE JUEGO */
+.battle-main {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 1.5rem;
+    overflow: hidden;
+}
+
+.board-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0,0,0,0.2);
+    border-radius: 12px;
+}
+
+.battlefield-grid {
+    display: grid;
+    grid-template-columns: repeat(10, var(--cell-size));
+    grid-template-rows: repeat(10, var(--cell-size));
+    gap: 2px;
+    background-color: #0f3460;
+    padding: 8px;
+    border: 4px solid #16213e;
+    border-radius: var(--border-radius);
+    box-shadow: 0 0 40px rgba(0,0,0,0.6);
+}
+
+/* CELDAS */
+.battle-cell {
+    width: var(--cell-size);
+    height: var(--cell-size);
+    background-color: var(--bg-medium);
+    position: relative;
+    cursor: pointer;
+}
+
+.battle-cell.lake {
+    background-color: var(--lake-blue);
+    background-image: radial-gradient(circle, rgba(255,255,255,0.2) 1px, transparent 1px);
+    background-size: 8px 8px;
+    cursor: not-allowed;
+}
+
+/* SIDEBAR */
+.battle-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.log-container {
+    flex: 2;
+    background: var(--bg-light);
+    border-radius: var(--border-radius);
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.log-messages {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--bg-dark);
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.inventory-status {
+    background: var(--bg-light);
+    padding: 15px;
+    border-radius: var(--border-radius);
+}
+
+.mini-status-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.status-item {
+    background: var(--bg-dark);
+    padding: 8px;
+    border-radius: 6px;
+    text-align: center;
+    border-left: 3px solid var(--accent-player);
+}
+
+.btn-surrender {
+    background: linear-gradient(to bottom, #e94560, #a01a30);
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: var(--border-radius);
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-surrender:hover {
+    filter: brightness(1.2);
+    transform: translateY(-2px);
+}

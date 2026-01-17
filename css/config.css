@@ -117,17 +117,50 @@
 }
 
 .piece-item {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-radius: var(--border-radius);
-    padding: 0.75rem;
-    margin-bottom: 0.5rem;
+    width: 100%;
     display: flex;
+    flex-direction: row; /* Alineación horizontal para la lista */
     align-items: center;
-    gap: 0.75rem;
-    cursor: move;
-    transition: background-color 0.2s;
-    border: 1px solid transparent;
+    gap: 1rem;           /* Espacio entre imagen y texto */
+    padding: 0.75rem;    /* Más aire interno */
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    box-sizing: border-box;
+    cursor: grab;
 }
+
+.piece-content {
+    width: 50px;  /* Tamaño fijo para la imagen en la lista */
+    height: 50px;
+    flex-shrink: 0; /* Evita que la imagen se aplaste */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.piece-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Para que la cara se vea bien encuadrada */
+    border-radius: 4px;
+}
+
+
+.piece-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    font-size: 10px;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-weight: bold;
+}
+
 
 .piece-item:hover {
     background-color: rgba(255, 255, 255, 0.1);
@@ -341,4 +374,40 @@
     .config-controls {
         grid-row: 3;
     }
+}
+
+.piece-label {
+    font-size: 9px; /* Tamaño muy pequeño para que quepa en el tablero */
+    line-height: 1;
+    text-align: center;
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis; /* Si el nombre es largo, pone "..." */
+    color: #eee;
+}
+
+/* Esto corrige específicamente las piezas cuando están DENTRO del tablero */
+.board-grid .piece-item {
+    flex-direction: column;
+    padding: 2px;
+    background: none;
+    border: none;
+    gap: 2px;
+    height: 100%;
+}
+
+.board-grid .piece-content {
+    width: 100%;
+    height: auto;
+    flex: 1;
+}
+
+.board-grid .piece-img {
+    max-height: 35px; /* Ajuste para que quepa en la celda */
+    width: auto;
+}
+
+.board-grid .piece-label {
+    font-size: 8px;
 }

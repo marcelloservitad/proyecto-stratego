@@ -38,58 +38,82 @@ function loadGameState() {
     }
 }
 
+
+/**
+ * Crea la cuadrícula de 10x4 para el despliegue del jugador.
+ * En esta zona todas las celdas son válidas para colocar piezas.
+ */
 function createDeploymentBoard() {
     const board = document.getElementById('player-board');
+    if (!board) {
+        return;
+    }
     board.innerHTML = '';
     
-    // Crear tablero 10x4 (las primeras 4 filas del jugador)
     for (let row = 0; row < 4; row++) {
         for (let col = 0; col < 10; col++) {
             const cell = document.createElement('div');
-            cell.className = 'board-cell';
+            // Todas las celdas en la zona de despliegue son válidas
+            cell.className = 'board-cell valid';
             cell.dataset.row = row;
             cell.dataset.col = col;
             
-            // Marcar lagos (posiciones fijas donde no se pueden colocar piezas)
-            if ((row === 2 || row === 3) && (col === 2 || col === 3 || col === 6 || col === 7)) {
-                cell.classList.add('lake');
-                cell.title = 'Lago - No transitable';
-            } else {
-                cell.classList.add('valid');
-                cell.addEventListener('dragover', handleDragOver);
-                cell.addEventListener('drop', handleDrop);
-                cell.addEventListener('dragenter', handleDragEnter);
-                cell.addEventListener('dragleave', handleDragLeave);
-            }
+            // Registramos los eventos para permitir el drag and drop
+            cell.addEventListener('dragover', handleDragOver);
+            cell.addEventListener('drop', handleDrop);
+            cell.addEventListener('dragenter', handleDragEnter);
+            cell.addEventListener('dragleave', handleDragLeave);
             
             board.appendChild(cell);
         }
     }
 }
 
+
+/**
+ * Renderiza la lista de piezas disponibles en el inventario lateral.
+ */
+
 function renderPieceInventory() {
     const piecesList = document.getElementById('pieces-list');
+    if (!piecesList) {
+        return;
+    }
     piecesList.innerHTML = '';
     
+    // Solo mostramos piezas que NO tienen una posición asignada
     const availablePieces = pieceInventory.getAvailablePieces();
     
-    availablePieces.forEach(piece => {
+    availablePieces.forEach((piece) => {
         const pieceElement = createPieceElement(piece);
         piecesList.appendChild(pieceElement);
     });
 }
 
+
+
+/**
+ * Crea el elemento visual de una pieza para el inventario.
+ * @param {Piece} piece - Objeto de la pieza.
+ */
+
+
 function createPieceElement(piece) {
     const div = document.createElement('div');
     div.className = 'piece-item';
     div.draggable = true;
-    div.dataset.pieceId = piece.id;
+    div.id = piece.id; 
+
+    const imageSrc = piece.image || 'assets/default-piece.png';
     
+    // Usamos una estructura más compacta
     div.innerHTML = `
-        <div class="piece-icon">${piece.rank === -1 ? '🏁' : '🪖'}</div>
-        <div class="piece-info">
-            <div class="piece-name">${piece.name}</div>
-            <div class="piece-rank">Rango: ${piece.rank > 0 ? piece.rank : 'Especial'}</div>
+        <div class="piece-content">
+            <img src="${imageSrc}" alt="${piece.name}" class="piece-img" draggable="false">
+            <div class="piece-badge">${piece.rank > 0 ? piece.rank : ''}</div>
+        </div>
+        <div class="piece-label">
+            <span class="name">${piece.name}</span>
         </div>
     `;
     
@@ -98,6 +122,7 @@ function createPieceElement(piece) {
     
     return div;
 }
+
 
 function setupDragAndDrop() {
     // Configurar eventos globales
@@ -111,14 +136,14 @@ function setupDragAndDrop() {
 }
 
 function handleDragStart(e) {
-    draggedPiece = e.target.dataset.pieceId;
-    e.dataTransfer.setData('text/plain', draggedPiece);
-    e.target.classList.add('dragging');
+    draggedPieceId = e.currentTarget.id;
+    e.dataTransfer.setData('text/plain', draggedPieceId);
+    e.currentTarget.classList.add('dragging');
 }
 
 function handleDragEnd(e) {
-    e.target.classList.remove('dragging');
-    draggedPiece = null;
+    e.currentTarget.classList.remove('dragging');
+    draggedPieceId = null;
 }
 
 function handleDragOver(e) {
@@ -126,140 +151,144 @@ function handleDragOver(e) {
 }
 
 function handleDragEnter(e) {
-    if (e.target.classList.contains('valid')) {
-        e.target.classList.add('drag-over');
+    if (e.currentTarget.classList.contains('valid')) {
+        e.currentTarget.classList.add('drag-over');
     }
 }
 
 function handleDragLeave(e) {
-    e.target.classList.remove('drag-over');
+    e.currentTarget.classList.remove('drag-over');
 }
 
+
+/**
+ * Maneja el evento de soltar una pieza en una celda del tablero.
+ */
 function handleDrop(e) {
     e.preventDefault();
-    e.target.classList.remove('drag-over');
+    const cell = e.currentTarget;
+    cell.classList.remove('drag-over');
     
-    if (!draggedPiece || !e.target.classList.contains('valid')) return;
+    const pieceId = e.dataTransfer.getData('text/plain');
+    const piece = pieceInventory.getPieceById(pieceId);
     
-    const piece = pieceInventory.getPieceById(draggedPiece);
-    if (!piece) return;
-    
-    const row = parseInt(e.target.dataset.row);
-    const col = parseInt(e.target.dataset.col);
-    
-    // Verificar si la casilla ya está ocupada
-    const existingPiece = getPieceAtPosition(row, col);
-    if (existingPiece) {
-        // Intercambiar posiciones
-        existingPiece.position = null;
-        piece.position = { row, col };
-        
-        // Mover la pieza existente de vuelta al inventario
-        renderPieceInventory();
-    } else {
-        // Colocar la pieza
-        piece.position = { row, col };
+    if (!piece || !cell.classList.contains('valid')) {
+        return;
     }
     
-    // Actualizar la visualización
-    updateBoardDisplay();
+    const row = parseInt(cell.dataset.row);
+    const col = parseInt(cell.dataset.col);
     
-    // Verificar si el despliegue está completo
+    // Lógica de ocupación
+    const existingPiece = getPieceAtPosition(row, col);
+    
+    if (existingPiece) {
+        // Si hay una pieza, la devolvemos al inventario (le quitamos la posición)
+        existingPiece.position = null;
+    }
+    
+    // Asignamos la nueva posición a la pieza arrastrada
+    piece.position = { row, col };
+    
+    // Actualizamos ambas vistas
+    updateBoardDisplay();
+    renderPieceInventory();
     checkDeploymentComplete();
 }
 
+/**
+ * Busca si existe una pieza en una coordenada específica.
+ */
 function getPieceAtPosition(row, col) {
-    return pieceInventory.getPlacedPieces().find(piece => 
-        piece.position && 
-        piece.position.row === row && 
-        piece.position.col === col
-    );
+    return pieceInventory.getPlacedPieces().find((p) => {
+        return p.position && p.position.row === row && p.position.col === col;
+    });
 }
 
+
+/**
+ * Actualiza visualmente todas las celdas del tablero.
+ */
+
 function updateBoardDisplay() {
-    const cells = document.querySelectorAll('.board-cell:not(.lake)');
+    const cells = document.querySelectorAll('.board-cell.valid, .board-cell.occupied');
     
-    cells.forEach(cell => {
+    cells.forEach((cell) => {
         const row = parseInt(cell.dataset.row);
         const col = parseInt(cell.dataset.col);
         const piece = getPieceAtPosition(row, col);
         
+        // Limpiamos la celda siempre al empezar
+        cell.innerHTML = '';
+        
         if (piece) {
             cell.className = 'board-cell occupied';
-            cell.innerHTML = `
-                <div class="piece-on-board" data-piece-id="${piece.id}">
-                    <span class="piece-symbol">${piece.rank === -1 ? '🏁' : '🪖'}</span>
-                    <span class="piece-name">${piece.name}</span>
-                </div>
-            `;
             
-            // Hacer las piezas en el tablero también arrastrables
-            const pieceElement = cell.querySelector('.piece-on-board');
-            pieceElement.draggable = true;
-            pieceElement.addEventListener('dragstart', handleDragStart);
-            pieceElement.addEventListener('dragend', handleDragEnd);
+            const pieceElement = createPieceElement(piece);
+            pieceElement.classList.add('piece-on-board');
+            
+            cell.appendChild(pieceElement);
         } else {
             cell.className = 'board-cell valid';
-            cell.innerHTML = '';
         }
     });
 }
 
+
+/**
+ * Configura los botones de acción de la interfaz.
+ */
 function setupConfigEventListeners() {
-    // Botón de despliegue aleatorio
-    document.getElementById('randomize-btn').addEventListener('click', randomizeDeployment);
-    
-    // Botón de guardar formación
-    document.getElementById('save-formation-btn').addEventListener('click', saveFormation);
-    
-    // Botón de cargar formación
-    document.getElementById('load-formation-btn').addEventListener('click', loadFormationsModal);
-    
-    // Botón de listo
-    document.getElementById('ready-btn').addEventListener('click', toggleReady);
-    
-    // Botón de retirarse
-    document.getElementById('cancel-game').addEventListener('click', cancelGame);
-    
-    // Chat privado
-    document.getElementById('send-private-message').addEventListener('click', sendPrivateMessage);
-    document.getElementById('private-message-input').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendPrivateMessage();
-    });
+    const randomizeBtn = document.getElementById('randomize-btn');
+    if (randomizeBtn) {
+        randomizeBtn.addEventListener('click', randomizeDeployment);
+    }
+
+    const readyBtn = document.getElementById('ready-btn');
+    if (readyBtn) {
+        readyBtn.addEventListener('click', toggleReady);
+    }
 }
 
+
+/**
+ * Distribuye todas las piezas en el tablero de forma aleatoria.
+ * Utiliza el algoritmo Fisher-Yates para garantizar aleatoriedad real.
+ */
 function randomizeDeployment() {
-    // Limpiar todas las posiciones actuales
-    pieceInventory.getPlacedPieces().forEach(piece => {
+    // 1. Limpiamos posiciones previas de TODAS las piezas para empezar de cero
+    pieceInventory.pieces.forEach((piece) => {
         piece.position = null;
     });
-    
-    // Obtener todas las celdas válidas
-    const validCells = Array.from(document.querySelectorAll('.board-cell.valid'));
-    
-    // Mezclar las celdas
-    for (let i = validCells.length - 1; i > 0; i--) {
+
+    // 2. Obtenemos todas las piezas y todas las celdas del tablero
+    const allPieces = pieceInventory.pieces;
+    const allCells = Array.from(document.querySelectorAll('.board-cell.valid'));
+
+    // 3. Mezclamos el array de celdas usando Fisher-Yates
+    for (let i = allCells.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [validCells[i], validCells[j]] = [validCells[j], validCells[i]];
+        // Intercambio de elementos (Destructuring assignment)
+        [allCells[i], allCells[j]] = [allCells[j], allCells[i]];
     }
-    
-    // Colocar cada pieza en una celda aleatoria
-    const pieces = pieceInventory.getAvailablePieces();
-    pieces.forEach((piece, index) => {
-        if (index < validCells.length) {
-            const cell = validCells[index];
+
+    // 4. Asignamos cada pieza a una celda mezclada
+    allPieces.forEach((piece, index) => {
+        if (index < allCells.length) {
+            const cell = allCells[index];
             piece.position = {
                 row: parseInt(cell.dataset.row),
                 col: parseInt(cell.dataset.col)
             };
         }
     });
-    
-    // Actualizar displays
+
+    // 5. Refrescamos la interfaz
     updateBoardDisplay();
     renderPieceInventory();
     checkDeploymentComplete();
 }
+
 
 function saveFormation() {
     if (!pieceInventory.isDeploymentComplete()) {
@@ -357,30 +386,33 @@ function toggleReady() {
     }
     
     playerReady = !playerReady;
-    updateReadyStatus();
-    
-    // Enviar estado al servidor
-    const message = {
-        type: 'player_ready',
-        ready: playerReady,
-        deployment: pieceInventory.getPlacedPieces().map(p => ({
-            type: p.type,
-            position: p.position
-        })),
-        gameId: AppState.currentGame.id
-    };
-    
-    if (AppState.currentGame.mode === 'pvp') {
-        Comms.sendMessage(message);
-    }
-    
-    // En PvE, el bot siempre está listo automáticamente
-    if (AppState.currentGame.mode === 'pve' && playerReady) {
+
+    if (playerReady) {
+        const readyBtn = document.getElementById('ready-btn');
+        readyBtn.disabled = true; 
+        readyBtn.textContent = '⌛ ESPERANDO AL BOT...';
+
+        // Simulamos la respuesta del Bot
         setTimeout(() => {
             opponentReady = true;
             updateReadyStatus();
-            checkBothReady();
-        }, 1000);
+            
+            setTimeout(() => {
+                try {
+                    console.log('Iniciando guardado y redirección...');
+                    saveFinalDeployment();
+                    console.log('Guardado exitoso');
+                } catch (error) {
+                    console.error('Error al guardar el despliegue:', error);
+                }
+                // Redirección al campo de batalla (Etapa 3)
+                window.location.href = 'battlefield.html';
+            }, 1000);
+        }, 1500);
+        
+    } else {
+        opponentReady = false;
+        updateReadyStatus();
     }
 }
 
@@ -389,56 +421,52 @@ function updateReadyStatus() {
     const opponentStatus = document.getElementById('opponent-status');
     const readyBtn = document.getElementById('ready-btn');
     
-    playerStatus.className = `status-value ${playerReady ? 'ready' : 'not-ready'}`;
-    playerStatus.innerHTML = playerReady ? '✅ Listo' : '❌ No listo';
+    if (playerStatus) {
+        playerStatus.className = `status-value ${playerReady ? 'ready' : 'not-ready'}`;
+        playerStatus.innerHTML = playerReady ? '✅ Listo' : '❌ No listo';
+    }
     
-    opponentStatus.className = `status-value ${opponentReady ? 'ready' : 'not-ready'}`;
-    opponentStatus.innerHTML = opponentReady ? '✅ Listo' : '❌ No listo';
+    if (opponentStatus) {
+        opponentStatus.className = `status-value ${opponentReady ? 'ready' : 'not-ready'}`;
+        opponentStatus.innerHTML = opponentReady ? '✅ Listo' : '❌ No listo';
+    }
     
-    readyBtn.textContent = playerReady ? '🔄 CANCELAR LISTO' : '⚡ MARCAR COMO LISTO';
-    readyBtn.className = playerReady ? 'btn-warning btn-large' : 'btn-success btn-large';
-}
-
-function checkBothReady() {
-    if (playerReady && opponentReady) {
-        // Guardar el despliegue final
-        saveFinalDeployment();
-        
-        // Redirigir al juego
-        setTimeout(() => {
-            window.location.href = 'game.html';
-        }, 1500);
+    if (readyBtn && !opponentReady) {
+        readyBtn.disabled = !pieceInventory.isDeploymentComplete();
+        readyBtn.textContent = playerReady ? '🔄 CANCELAR LISTO' : '⚡ MARCAR COMO LISTO';
+        readyBtn.className = playerReady ? 'btn-warning btn-large' : 'btn-success btn-large';
     }
 }
+
 
 function saveFinalDeployment() {
     const deployment = {
         gameId: AppState.currentGame.id,
-        player: AppState.user.id,
+        player: AppState.user ? AppState.user.id : 'invitado',
         pieces: pieceInventory.getPlacedPieces().map(piece => ({
             id: piece.id,
             type: piece.type,
+            rank: piece.rank,
             position: piece.position,
+            image: piece.image,
             player: 'player'
         })),
         timestamp: Date.now()
     };
     
     localStorage.setItem('game_deployment', JSON.stringify(deployment));
+    AppState.currentGame.status = 'playing';
+    localStorage.setItem('current_game', JSON.stringify(AppState.currentGame));
 }
 
 function checkDeploymentComplete() {
-    const complete = pieceInventory.isDeploymentComplete();
+    const isComplete = pieceInventory.isDeploymentComplete();
     const readyBtn = document.getElementById('ready-btn');
-    
-    if (complete) {
-        readyBtn.disabled = false;
-        readyBtn.title = 'Tu ejército está listo para la batalla';
-    } else {
-        readyBtn.disabled = true;
-        readyBtn.title = 'Coloca todas las piezas primero';
+    if (readyBtn) {
+        readyBtn.disabled = !isComplete;
     }
 }
+
 
 function updateGameInfo() {
     document.getElementById('game-mode-display').textContent = 
@@ -514,3 +542,4 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeConfig();
     }
 });
+

@@ -1594,4 +1594,4 @@ document.addEventListener('DOMContentLoaded', () => {
         window.handleOfferDraw = () => window.gameManager.handleOfferDraw();
         window.handleSaveGame = () => window.gameManager.handleSaveGame();
     }
-});
+});*/
