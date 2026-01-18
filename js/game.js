@@ -1,4 +1,81 @@
-// game.js - Lógica completa del juego Stratego
+// ==============================================
+// DEFINICIONES INICIALES
+// ==============================================
+
+// Datos de piezas del juego (versión completa)
+const PIECES_DATA = {
+    classic: [
+        { id: 'marshal', name: 'Mariscal', rank: 10, count: 1, movable: true },
+        { id: 'general', name: 'General', rank: 9, count: 1, movable: true },
+        { id: 'colonel', name: 'Coronel', rank: 8, count: 2, movable: true },
+        { id: 'major', name: 'Comandante', rank: 7, count: 3, movable: true },
+        { id: 'captain', name: 'Capitán', rank: 6, count: 4, movable: true },
+        { id: 'lieutenant', name: 'Teniente', rank: 5, count: 4, movable: true },
+        { id: 'sergeant', name: 'Sargento', rank: 4, count: 4, movable: true },
+        { id: 'miner', name: 'Minador', rank: 3, count: 5, movable: true },
+        { id: 'scout', name: 'Explorador', rank: 2, count: 8, movable: true, special: 'long_move' },
+        { id: 'spy', name: 'Espía', rank: 1, count: 1, movable: true, special: 'attack_marshal' },
+        { id: 'bomb', name: 'Bomba', rank: 0, count: 6, movable: false, special: 'immobile_explodes' },
+        { id: 'flag', name: 'Bandera', rank: -1, count: 1, movable: false, special: 'objective' }
+    ],
+    quick: [
+        { id: 'marshal', name: 'Mariscal', rank: 10, count: 1, movable: true },
+        { id: 'colonel', name: 'Coronel', rank: 8, count: 1, movable: true },
+        { id: 'major', name: 'Comandante', rank: 7, count: 1, movable: true },
+        { id: 'captain', name: 'Capitán', rank: 6, count: 1, movable: true },
+        { id: 'miner', name: 'Minador', rank: 3, count: 2, movable: true },
+        { id: 'scout', name: 'Explorador', rank: 2, count: 2, movable: true, special: 'long_move' },
+        { id: 'spy', name: 'Espía', rank: 1, count: 1, movable: true, special: 'attack_marshal' },
+        { id: 'bomb', name: 'Bomba', rank: 0, count: 1, movable: false, special: 'immobile_explodes' },
+        { id: 'flag', name: 'Bandera', rank: -1, count: 1, movable: false, special: 'objective' }
+    ]
+};
+
+// Clase Piece - Representa una pieza individual del juego
+class Piece {
+    constructor(config, player) {
+        this.id = `piece_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        this.type = config.id;
+        this.name = config.name;
+        this.rank = config.rank;
+        this.player = player;
+        this.movable = config.movable !== false;
+        this.special = config.special;
+        this.revealed = player === 'player'; // Las propias piezas siempre están reveladas
+        this.position = null;
+    }
+    
+    canMove() {
+        return this.movable && !(this.type === 'flag' || this.type === 'bomb');
+    }
+}
+
+// Clase CommunicationManager dummy para evitar errores
+class CommunicationManager {
+    constructor() {
+        this.activeProtocol = null;
+    }
+    
+    initialize(protocol) {
+        this.activeProtocol = protocol;
+        console.log('CommunicationManager inicializado con protocolo:', protocol);
+    }
+    
+    sendMessage(message) {
+        console.log('Enviando mensaje:', message);
+        return Promise.resolve(true);
+    }
+    
+    sendChatMessage(message) {
+        console.log('Enviando mensaje de chat:', message);
+        return Promise.resolve(true);
+    }
+}
+
+// ==============================================
+// CLASE PRINCIPAL GAMEMANAGER
+// ==============================================
+
 class GameManager {
     constructor() {
         this.board = new Array(10).fill().map(() => new Array(10).fill(null));
@@ -13,7 +90,7 @@ class GameManager {
         this.turnHistory = [];
         this.gameStartTime = null;
         this.moveCount = 0;
-        this.gameMode = 'pvp'; // 'pvp' o 'pve'
+        this.gameMode = 'pve'; // 'pvp' o 'pve'
         this.winner = null;
         this.victoryType = null; // 'flag_capture', 'annihilation', 'surrender', 'stalemate'
         
@@ -66,7 +143,7 @@ class GameManager {
         this.setupGameEventListeners();
         
         // Actualizar interfaz
-        this.updateGameDisplay();
+        this.updateBoardDisplay();
         this.updatePiecesCount();
         this.updateProtocolDisplay();
         
@@ -87,7 +164,7 @@ class GameManager {
         const savedGame = localStorage.getItem('current_game');
         if (savedGame) {
             const gameData = JSON.parse(savedGame);
-            this.gameMode = gameData.mode;
+            this.gameMode = gameData.mode || 'pve';
             AppState.currentGame = gameData;
         }
         
@@ -110,7 +187,8 @@ class GameManager {
         
         // Cargar piezas del jugador
         deployment.pieces.forEach(pieceData => {
-            const pieceConfig = PIECES_DATA.classic.find(p => p.id === pieceData.type);
+            const pieceConfig = PIECES_DATA.classic.find(p => p.id === pieceData.type) || 
+                              PIECES_DATA.quick.find(p => p.id === pieceData.type);
             if (pieceConfig) {
                 const piece = new Piece(pieceConfig, 'player');
                 piece.id = pieceData.id || piece.id;
@@ -139,7 +217,7 @@ class GameManager {
         // Para PvE, generamos un despliegue aleatorio para el bot
         
         const gameType = AppState.currentGame?.gameType || 'classic';
-        const piecesConfig = PIECES_DATA[gameType];
+        const piecesConfig = PIECES_DATA[gameType] || PIECES_DATA.classic;
         
         // Crear lista de todas las piezas del oponente
         piecesConfig.forEach(pieceData => {
@@ -999,6 +1077,9 @@ class GameManager {
         const gameHistory = JSON.parse(localStorage.getItem('game_history') || '[]');
         gameHistory.unshift(gameResult);
         localStorage.setItem('game_history', JSON.stringify(gameHistory.slice(0, 50))); // Mantener solo las 50 últimas
+        
+        // Guardar como último resultado para postgame.html
+        localStorage.setItem('last_game_result', JSON.stringify(gameResult));
     }
     
     // Métodos de UI
@@ -1594,4 +1675,4 @@ document.addEventListener('DOMContentLoaded', () => {
         window.handleOfferDraw = () => window.gameManager.handleOfferDraw();
         window.handleSaveGame = () => window.gameManager.handleSaveGame();
     }
-});*/
+});

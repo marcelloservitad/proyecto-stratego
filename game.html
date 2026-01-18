@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stratego - En Batalla</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>⚔️ Campo de Batalla - Stratego</h1>
+            <div class="user-info">
+                <span id="game-player-name"></span>
+                <button id="game-logout-btn" class="btn-exit">Salir</button>
+            </div>
+        </header>
+
+        <main class="game-container">
+            <!-- Tablero de juego -->
+            <section class="game-board">
+                <h2>Campo de Batalla</h2>
+                <div class="board-full" id="game-board">
+                    <!-- 10x10 celdas generadas por JavaScript -->
+                </div>
+                <div class="board-legend">
+                    <div class="legend-item lake">🌊 Lago (No transitable)</div>
+                    <div class="legend-item player-territory">🔵 Tu territorio</div>
+                    <div class="legend-item opponent-territory">🔴 Territorio enemigo</div>
+                </div>
+            </section>
+
+            <!-- Panel de información -->
+            <aside class="game-info-panel">
+                <div class="turn-indicator" id="turn-indicator">
+                    🎮 TU TURNO
+                </div>
+                
+                <div class="player-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="player-pieces-count">40</div>
+                        <div class="stat-label">Tus piezas</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="opponent-pieces-count">40</div>
+                        <div class="stat-label">Piezas enemigas</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="game-timer">00:00</div>
+                        <div class="stat-label">Tiempo</div>
+                    </div>
+                </div>
+
+                <div class="protocol-display-game" id="game-protocol-display">
+                    Protocolo: WebSockets Activo
+                </div>
+
+                <!-- Historial de movimientos -->
+                <div class="move-history-container">
+                    <h3>📜 Historial de Movimientos</h3>
+                    <div class="move-history" id="move-history">
+                        <!-- Movimientos se agregarán aquí -->
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Chat de juego -->
+            <section class="game-chat">
+                <h3>💬 Chat de Batalla</h3>
+                <div class="chat-messages" id="game-chat-messages">
+                    <div class="message system">
+                        [Sistema]: La batalla ha comenzado. ¡Buena suerte!
+                    </div>
+                </div>
+                <div class="chat-input">
+                    <input type="text" id="game-chat-input" placeholder="Escribe un mensaje...">
+                    <button id="send-game-chat">Enviar</button>
+                </div>
+            </section>
+
+            <!-- Controles del juego -->
+            <section class="game-controls">
+                <div class="control-buttons">
+                    <button id="surrender-btn" class="btn-danger">🏳️ Rendirse</button>
+                    <button id="offer-draw-btn" class="btn-secondary">🤝 Ofrecer tablas</button>
+                    <button id="save-game-btn" class="btn-secondary">💾 Guardar partida</button>
+                    <button id="toggle-protocol-btn" class="btn-secondary">🔄 Cambiar protocolo</button>
+                </div>
+                
+                <div class="game-status">
+                    <span id="game-status-text">En curso</span>
+                    <span class="connection-indicator connected"></span>
+                </div>
+            </section>
+        </main>
+
+        <!-- Modal de información de pieza (se muestra dinámicamente) -->
+        <div id="piece-info" class="piece-info-modal hidden"></div>
+        
+        <!-- Modal de combate (se muestra dinámicamente) -->
+        <div id="combat-modal" class="modal combat-modal hidden"></div>
+        
+        <!-- Modal de fin de juego (se muestra dinámicamente) -->
+        <div id="game-over-modal" class="modal game-over-modal hidden"></div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="js/communication.js"></script>
+    <script src="js/pieces.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>

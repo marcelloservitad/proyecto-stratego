@@ -5,6 +5,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     initBattlefield();
     cargarPiezasAliadas(); // Nueva función
+    setupBattlefieldEventListeners();
 });
 
 const BOARD_SIZE = 10;
@@ -47,6 +48,204 @@ function initBattlefield() {
  */
 function handleCellClick(row, col) {
     console.log(`Click en: Fila ${row}, Columna ${col}`);
-    // Aquí irá la lógica de selección y movimiento más adelante
+    
+    // Si existe GameManager, usar su lógica
+    if (window.gameManager && typeof window.gameManager.handleCellClick === 'function') {
+        window.gameManager.handleCellClick(row, col);
+    } else {
+        // Lógica básica para battlefield.html
+        const cell = document.querySelector(`.battle-cell[data-row="${row}"][data-col="${col}"]`);
+        if (cell && !cell.classList.contains('lake')) {
+            // Cambiar visualmente la celda seleccionada
+            document.querySelectorAll('.battle-cell.selected').forEach(c => {
+                c.classList.remove('selected');
+            });
+            cell.classList.add('selected');
+            
+            // Mostrar información en el log
+            addBattleLog(`Celda seleccionada: Fila ${row}, Columna ${col}`);
+        }
+    }
 }
 
+/**
+ * Carga las piezas aliadas en el campo de batalla
+ */
+function cargarPiezasAliadas() {
+    console.log('Cargando piezas aliadas...');
+    
+    // Obtener despliegue guardado
+    const deployment = JSON.parse(localStorage.getItem('game_deployment'));
+    if (!deployment) {
+        console.error('No se encontró despliegue guardado');
+        addBattleLog('Error: No se pudo cargar el despliegue de piezas', 'error');
+        return;
+    }
+    
+    console.log('Despliegue cargado:', deployment.pieces.length, 'piezas');
+    addBattleLog(`${deployment.pieces.length} piezas aliadas cargadas`);
+    
+    // Actualizar contadores
+    updatePieceCounters(deployment.pieces.length);
+    
+    // Notificar al GameManager que cargue las piezas (si está en game.html)
+    if (window.gameManager && typeof window.gameManager.loadDeployment === 'function') {
+        window.gameManager.loadDeployment();
+    } else {
+        // Si estamos en battlefield.html, colocar piezas visualmente
+        placePiecesOnBattlefield(deployment.pieces);
+    }
+}
+
+/**
+ * Coloca piezas en el campo de batalla (para battlefield.html)
+ */
+function placePiecesOnBattlefield(pieces) {
+    // Limpiar tablero primero
+    document.querySelectorAll('.battle-cell:not(.lake)').forEach(cell => {
+        const row = parseInt(cell.dataset.row);
+        const col = parseInt(cell.dataset.col);
+        
+        // Solo colocar en territorio del jugador (filas 6-9)
+        if (row >= 6) {
+            const piece = pieces.find(p => 
+                p.position && 
+                (9 - p.position.row) === row && // Invertir fila
+                p.position.col === col
+            );
+            
+            if (piece) {
+                // Crear elemento de pieza
+                const pieceDiv = document.createElement('div');
+                pieceDiv.className = 'battle-piece player';
+                pieceDiv.innerHTML = `
+                    <div class="piece-symbol">${getPieceSymbol(piece.type)}</div>
+                    <div class="piece-rank">${piece.rank}</div>
+                `;
+                pieceDiv.title = `${piece.name} (Rango: ${piece.rank})`;
+                cell.appendChild(pieceDiv);
+                cell.classList.add('occupied');
+            }
+        }
+    });
+}
+
+/**
+ * Obtiene el símbolo de una pieza
+ */
+function getPieceSymbol(type) {
+    const symbols = {
+        'marshal': '🎖️',
+        'general': '⭐',
+        'colonel': '🦅',
+        'major': '⚔️',
+        'captain': '🛡️',
+        'lieutenant': '⚜️',
+        'sergeant': '🔰',
+        'miner': '⛏️',
+        'scout': '👁️',
+        'spy': '🕵️',
+        'bomb': '💣',
+        'flag': '🏁'
+    };
+    
+    return symbols[type] || '❓';
+}
+
+/**
+ * Actualiza los contadores de piezas
+ */
+function updatePieceCounters(count) {
+    const aliveCount = document.getElementById('alive-count');
+    const deadCount = document.getElementById('dead-count');
+    
+    if (aliveCount) aliveCount.textContent = count;
+    if (deadCount) deadCount.textContent = 0;
+}
+
+/**
+ * Agrega mensaje al log de batalla
+ */
+function addBattleLog(message, type = 'info') {
+    const log = document.getElementById('battle-log');
+    if (!log) return;
+    
+    const messageDiv = document.createElement('p');
+    messageDiv.className = type === 'error' ? 'error-msg' : 'system-msg';
+    messageDiv.textContent = `[Sistema]: ${message}`;
+    
+    log.appendChild(messageDiv);
+    log.scrollTop = log.scrollHeight;
+}
+
+/**
+ * Configura los event listeners del campo de batalla
+ */
+function setupBattlefieldEventListeners() {
+    // Botón de rendición
+    const surrenderBtn = document.querySelector('.btn-surrender');
+    if (surrenderBtn) {
+        surrenderBtn.addEventListener('click', () => {
+            if (confirm('¿Estás seguro de que quieres rendirte?')) {
+                // Aquí iría la lógica de rendición
+                console.log('Jugador se rinde');
+                addBattleLog('Te has rendido. ¡La batalla ha terminado!', 'error');
+                
+                // Si existe GameManager, usar su método
+                if (window.gameManager && typeof window.gameManager.handleSurrender === 'function') {
+                    window.gameManager.handleSurrender();
+                } else {
+                    // Redirigir al lobby como fallback
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
+                }
+            }
+        });
+    }
+    
+    // Temporizador de turno
+    updateTurnTimer();
+    setInterval(updateTurnTimer, 1000);
+}
+
+/**
+ * Actualiza el temporizador de turno
+ */
+function updateTurnTimer() {
+    const turnDisplay = document.getElementById('turn-display');
+    if (turnDisplay) {
+        // Simular cambio de turno cada 30 segundos para demostración
+        const seconds = Math.floor(Date.now() / 1000) % 60;
+        turnDisplay.textContent = seconds < 30 ? 'TU TURNO' : 'TURNO ENEMIGO';
+        turnDisplay.style.color = seconds < 30 ? '#4cd137' : '#e94560';
+    }
+}
+
+// Función para redirigir a game.html cuando se completa el despliegue
+function redirectToGame() {
+    console.log('Redirigiendo a game.html...');
+    window.location.href = 'game.html';
+}
+
+// Si estamos en battlefield.html y hay un despliegue guardado, 
+// podemos permitir continuar a game.html
+document.addEventListener('DOMContentLoaded', () => {
+    // Verificar si hay despliegue guardado
+    const deployment = localStorage.getItem('game_deployment');
+    if (deployment && window.location.pathname.includes('battlefield.html')) {
+        // Agregar botón para continuar a juego completo si no existe
+        if (!document.querySelector('.btn-continue')) {
+            const continueBtn = document.createElement('button');
+            continueBtn.className = 'btn-success btn-continue';
+            continueBtn.textContent = '🎮 CONTINUAR A JUEGO COMPLETO';
+            continueBtn.style.marginTop = '1rem';
+            continueBtn.addEventListener('click', redirectToGame);
+            
+            const sidebar = document.querySelector('.battle-sidebar');
+            if (sidebar) {
+                sidebar.appendChild(continueBtn);
+            }
+        }
+    }
+});
