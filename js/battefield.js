@@ -4,7 +4,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     initBattlefield();
-    cargarPiezasAliadas(); // Nueva función
+    cargarPiezasAliadas();
     setupBattlefieldEventListeners();
 });
 
@@ -71,9 +71,6 @@ function handleCellClick(row, col) {
 /**
  * Carga las piezas aliadas en el campo de batalla
  */
-/**
- * Carga las piezas aliadas en el campo de batalla
- */
 function cargarPiezasAliadas() {
     console.log('Cargando piezas aliadas...');
     
@@ -101,10 +98,13 @@ function cargarPiezasAliadas() {
     }
     
     console.log('Despliegue cargado:', deployment.pieces.length, 'piezas');
+    console.log('Datos del despliegue:', deployment);
     addBattleLog(`${deployment.pieces.length} piezas aliadas cargadas`);
     
     // Filtrar solo piezas del jugador (por si acaso)
     const playerPieces = deployment.pieces.filter(p => p.player === 'player');
+    
+    console.log('Piezas del jugador:', playerPieces);
     
     // Actualizar contadores
     updatePieceCounters(playerPieces.length);
@@ -117,9 +117,7 @@ function cargarPiezasAliadas() {
         window.gameManager.loadDeployment();
     }
 }
-/**
- * Coloca piezas en el campo de batalla (para battlefield.html)
- */
+
 /**
  * Coloca piezas en el campo de batalla (para battlefield.html)
  */
@@ -139,34 +137,45 @@ function placePiecesOnBattlefield(pieces) {
             return;
         }
         
-        // Las piezas del jugador se despliegan en las últimas 4 filas (filas 6-9)
-        // En el tablero de 10x10, fila 0 es la parte superior
-        const row = 9 - piece.position.row; // Invertir porque el jugador está en la parte inferior
-        const col = piece.position.col;
+        // CORRECCIÓN IMPORTANTE:
+        // En el tablero de despliegue (configuración), las filas van de 0 a 3 (4 filas del jugador)
+        // En el tablero de batalla (10x10), las filas del jugador son las 6-9 (últimas 4 filas)
+        // Pero debemos mantener la relación: la primera fila del despliegue (fila 0) 
+        // corresponde a la primera fila del territorio del jugador en el campo de batalla (fila 6)
         
-        console.log(`Colocando ${piece.name} en (${row}, ${col}) [original: (${piece.position.row}, ${piece.position.col})]`);
+        const row = piece.position.row + 6;  // Fila 0 del despliegue -> Fila 6 del campo de batalla
+        const col = piece.position.col;      // La columna se mantiene igual
+        
+        console.log(`Colocando ${piece.name} (${piece.type}) en (${row}, ${col}) [original: (${piece.position.row}, ${piece.position.col})]`);
         
         const cell = document.querySelector(`.battle-cell[data-row="${row}"][data-col="${col}"]`);
         if (cell && !cell.classList.contains('lake')) {
             // Crear elemento de pieza
             const pieceDiv = document.createElement('div');
             pieceDiv.className = 'battle-piece player';
+            
+            // Obtener el símbolo correcto para la pieza
+            const symbol = getPieceSymbol(piece.type);
+            const rankDisplay = piece.rank > 0 ? piece.rank : '★';
+            
             pieceDiv.innerHTML = `
-                <div class="piece-symbol">${getPieceSymbol(piece.type)}</div>
-                <div class="piece-rank">${piece.rank > 0 ? piece.rank : '★'}</div>
+                <div class="piece-symbol">${symbol}</div>
+                <div class="piece-rank">${rankDisplay}</div>
             `;
-            pieceDiv.title = `${piece.name} (Rango: ${piece.rank > 0 ? piece.rank : 'Especial'})`;
+            
+            pieceDiv.title = `${piece.name || piece.type} (Rango: ${piece.rank > 0 ? piece.rank : 'Especial'})`;
             cell.appendChild(pieceDiv);
             cell.classList.add('occupied');
             
-            console.log(`✓ ${piece.name} colocada en celda (${row}, ${col})`);
+            console.log(`✓ ${piece.name || piece.type} colocada en celda (${row}, ${col})`);
         } else {
-            console.error(`No se pudo colocar ${piece.name} en (${row}, ${col}) - celda no encontrada o es lago`);
+            console.error(`No se pudo colocar ${piece.name || piece.type} en (${row}, ${col}) - celda no encontrada o es lago`);
         }
     });
     
     console.log('Colocación de piezas completada');
 }
+
 /**
  * Obtiene el símbolo de una pieza
  */
@@ -284,5 +293,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 sidebar.appendChild(continueBtn);
             }
         }
+    }
+    
+    // Agregar botón para volver a configurar si no hay despliegue
+    if (!deployment && window.location.pathname.includes('battlefield.html')) {
+        const backBtn = document.createElement('button');
+        backBtn.className = 'btn-secondary';
+        backBtn.textContent = '⬅️ VOLVER A CONFIGURAR';
+        backBtn.style.marginTop = '1rem';
+        backBtn.addEventListener('click', () => {
+            window.location.href = 'config.html';
+        });
+        
+        const sidebar = document.querySelector('.battle-sidebar');
+        if (sidebar) {
+            sidebar.appendChild(backBtn);
+        }
+        
+        addBattleLog('No se encontró despliegue. Vuelve a configurar tus piezas.', 'error');
     }
 });

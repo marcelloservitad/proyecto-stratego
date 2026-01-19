@@ -1058,3 +1058,51 @@
 ::-webkit-scrollbar-thumb:hover {
     background: #c53030;
 }
+
+/* Piezas del oponente ocultas */
+.game-piece.hidden-opponent {
+    background: linear-gradient(135deg, #e53e3e, #9b2c2c) !important;
+    border: 2px solid #fc8181 !important;
+    opacity: 0.9;
+}
+
+.game-piece.hidden-opponent .piece-symbol {
+    font-size: 1.2rem;
+    opacity: 0.8;
+}
+
+.game-piece.hidden-opponent .piece-rank {
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 3px rgba(0,0,0,0.5);
+}
+
+/* Efecto para cuando se revelan las piezas */
+.game-piece.revealed {
+    animation: revealPiece 0.5s ease-out;
+}
+
+@keyframes revealPiece {
+    0% { transform: scale(0.8); opacity: 0.5; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Botón de revelar */
+#reveal-opponent-btn {
+    background: linear-gradient(to bottom, #d69e2e, #b7791f);
+    color: white;
+    border: 2px solid #ecc94b;
+    transition: all 0.3s;
+}
+
+#reveal-opponent-btn:hover:not(:disabled) {
+    background: linear-gradient(to bottom, #ecc94b, #d69e2e);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(214, 158, 46, 0.4);
+}
+
+#reveal-opponent-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background: linear-gradient(to bottom, #38a169, #276749);
+}

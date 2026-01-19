@@ -1,4 +1,4 @@
-// game.js - Corregido con historial funcional y combates de 7 segundos
+// game.js - Corregido con historial funcional, combates de 7 segundos y soporte para 10 o 40 piezas
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeGame();
@@ -15,6 +15,9 @@ let gameState = {
     gameStartTime: null,
     totalMoves: 0
 };
+
+// Variable global para mostrar todas las piezas del oponente
+window.showAllOpponentPieces = false;
 
 // Ejército completo según reglas oficiales de Stratego (versión europea)
 const ARMY_COMPOSITION = [
@@ -43,8 +46,15 @@ function initializeGame() {
     setupGameEvents();
     updateUI();
     
-    console.log('Juego inicializado - 40 piezas por jugador');
-    addGameMessage('¡La batalla ha comenzado! 40 piezas por ejército.');
+    // Determinar modalidad para el mensaje
+    const deploymentData = localStorage.getItem('game_deployment');
+    const gameType = deploymentData ? 
+        JSON.parse(deploymentData).gameType : 
+        (JSON.parse(localStorage.getItem('current_game') || '{}').gameType || 'classic');
+    
+    const pieceCount = gameType === 'quick' ? 10 : 40;
+    console.log(`Juego inicializado - ${pieceCount} piezas por jugador`);
+    addGameMessage(`¡La batalla ha comenzado! ${pieceCount} piezas por ejército.`);
 }
 
 function createGameBoard() {
@@ -88,26 +98,25 @@ function isLakePosition(row, col) {
 }
 
 function loadPieces() {
-    console.log('Cargando 40 piezas por jugador...');
+    console.log('Cargando piezas por jugador...');
     
     const deploymentData = localStorage.getItem('game_deployment');
+    
     if (!deploymentData) {
-        console.log('No hay despliegue guardado. Creando ejércitos completos.');
-        createFullArmies();
+        // No hay despliegue, crear ejércitos según la modalidad
+        const currentGame = JSON.parse(localStorage.getItem('current_game') || '{}');
+        const gameType = currentGame.gameType || 'classic';
+        console.log(`No hay despliegue guardado. Creando ejércitos para modalidad ${gameType}.`);
+        createFullArmies(gameType);
         return;
     }
     
     try {
         const deployment = JSON.parse(deploymentData);
         const playerPieces = deployment.pieces || [];
+        const gameType = deployment.gameType || 'classic';
         
-        if (playerPieces.length !== 40) {
-            console.warn(`Despliegue tiene ${playerPieces.length} piezas, deberían ser 40. Creando ejércitos completos.`);
-            createFullArmies();
-            return;
-        }
-        
-        console.log(`Cargando ${playerPieces.length} piezas del jugador`);
+        console.log(`Cargando ${playerPieces.length} piezas del jugador (modalidad: ${gameType})`);
         
         playerPieces.forEach((piece) => {
             if (piece.position) {
@@ -128,82 +137,16 @@ function loadPieces() {
             }
         });
         
-        createOpponentArmy();
+        gameState.playerPiecesRemaining = playerPieces.length;
+        
+        createOpponentArmy(gameType);
         
     } catch (error) {
         console.error('Error al cargar piezas:', error);
-        createFullArmies();
+        const currentGame = JSON.parse(localStorage.getItem('current_game') || '{}');
+        const gameType = currentGame.gameType || 'classic';
+        createFullArmies(gameType);
     }
-}
-
-function createFullArmies() {
-    createPlayerArmy();
-    createOpponentArmy();
-}
-
-function createPlayerArmy() {
-    console.log('Creando ejército completo del jugador (40 piezas)...');
-    const army = generateFullArmy('player');
-    let placed = 0;
-    
-    for (let row = 6; row < 10 && placed < 40; row++) {
-        for (let col = 0; col < 10 && placed < 40; col++) {
-            if (!isLakePosition(row, col) && !gameState.board[row][col]) {
-                placePiece(row, col, army[placed]);
-                placed++;
-            }
-        }
-    }
-    
-    gameState.playerPiecesRemaining = 40;
-    console.log(`Colocadas ${placed} piezas del jugador`);
-}
-
-function createOpponentArmy() {
-    console.log('Creando ejército completo del oponente (40 piezas)...');
-    const army = generateFullArmy('opponent');
-    let placed = 0;
-    
-    for (let row = 0; row < 4 && placed < 40; row++) {
-        for (let col = 0; col < 10 && placed < 40; col++) {
-            if (!isLakePosition(row, col) && !gameState.board[row][col]) {
-                placePiece(row, col, army[placed]);
-                placed++;
-            }
-        }
-    }
-    
-    gameState.opponentPiecesRemaining = 40;
-    console.log(`Colocadas ${placed} piezas del oponente`);
-}
-
-function generateFullArmy(player) {
-    const army = [];
-    
-    ARMY_COMPOSITION.forEach(unit => {
-        for (let i = 0; i < unit.count; i++) {
-            army.push({
-                type: unit.type,
-                name: unit.name,
-                rank: unit.rank,
-                player: player,
-                revealed: player === 'player',
-                symbol: unit.symbol,
-                id: `${unit.type}_${player}_${i}`
-            });
-        }
-    });
-    
-    return shuffleArray(army);
-}
-
-function shuffleArray(array) {
-    const shuffled = [...array];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
 }
 
 function placePiece(row, col, pieceData) {
@@ -227,27 +170,141 @@ function updateCellDisplay(row, col) {
     
     const pieceElement = document.createElement('div');
     pieceElement.className = `game-piece ${piece.player} ${piece.type}`;
-    if (piece.revealed) pieceElement.classList.add('revealed');
     
-    const displayRank = piece.revealed ? 
-        (piece.rank >= 0 ? piece.rank : 'F') : 
-        '?';
+    // Si la pieza es del oponente y no está revelada, mostrar versión oculta
+    if (piece.player === 'opponent' && !piece.revealed) {
+        pieceElement.classList.add('hidden-opponent');
+    } else if (piece.revealed) {
+        pieceElement.classList.add('revealed');
+    }
+    
+    // Determinar qué mostrar
+    let displaySymbol = '❓';
+    let displayRank = '?';
+    
+    if (piece.player === 'player') {
+        // Jugador siempre ve sus piezas
+        displaySymbol = piece.symbol;
+        displayRank = piece.rank >= 0 ? piece.rank : 'F';
+    } else if (piece.revealed || window.showAllOpponentPieces) {
+        // Opotente solo se ve si está revelado o si activamos la vista
+        displaySymbol = piece.symbol;
+        displayRank = piece.rank >= 0 ? piece.rank : 'F';
+    }
     
     pieceElement.innerHTML = `
-        <div class="piece-symbol">${piece.symbol}</div>
+        <div class="piece-symbol">${displaySymbol}</div>
         <div class="piece-rank">${displayRank}</div>
     `;
     
-    pieceElement.title = piece.revealed ? 
-        `${piece.name} ${piece.rank >= 0 ? '(Rango: ' + piece.rank + ')' : '(Bandera)'}` : 
-        'Pieza enemiga - Desconocida';
+    // Tooltip diferente según estado
+    if (piece.player === 'player') {
+        pieceElement.title = `${piece.name} (Rango: ${piece.rank >= 0 ? piece.rank : 'Bandera'})`;
+    } else if (piece.revealed || window.showAllOpponentPieces) {
+        pieceElement.title = `${piece.name} (Rango: ${piece.rank >= 0 ? piece.rank : 'Bandera'})`;
+    } else {
+        pieceElement.title = 'Pieza enemiga - Desconocida';
+    }
     
-    pieceElement.addEventListener('click', (e) => {
-        e.stopPropagation();
-        handlePieceClick(row, col);
-    });
+    // Solo las piezas del jugador son clickeables
+    if (piece.player === 'player') {
+        pieceElement.addEventListener('click', (e) => {
+            e.stopPropagation();
+            handlePieceClick(row, col);
+        });
+    }
     
     cell.appendChild(pieceElement);
+}
+function createFullArmies(gameType) {
+    createPlayerArmy(gameType);
+    createOpponentArmy(gameType);
+}
+
+function createPlayerArmy(gameType) {
+    console.log(`Creando ejército del jugador (modalidad: ${gameType})...`);
+    const army = generateFullArmy('player', gameType);
+    let placed = 0;
+    
+    for (let row = 6; row < 10 && placed < army.length; row++) {
+        for (let col = 0; col < 10 && placed < army.length; col++) {
+            if (!isLakePosition(row, col) && !gameState.board[row][col]) {
+                placePiece(row, col, army[placed]);
+                placed++;
+            }
+        }
+    }
+    
+    gameState.playerPiecesRemaining = army.length;
+    console.log(`Colocadas ${placed} piezas del jugador`);
+}
+
+function createOpponentArmy(gameType) {
+    console.log(`Creando ejército del oponente (modalidad: ${gameType})...`);
+    const army = generateFullArmy('opponent', gameType);
+    let placed = 0;
+    
+    for (let row = 0; row < 4 && placed < army.length; row++) {
+        for (let col = 0; col < 10 && placed < army.length; col++) {
+            if (!isLakePosition(row, col) && !gameState.board[row][col]) {
+                placePiece(row, col, army[placed]);
+                placed++;
+            }
+        }
+    }
+    
+    gameState.opponentPiecesRemaining = army.length;
+    console.log(`Colocadas ${placed} piezas del oponente`);
+}
+
+function generateFullArmy(player, gameType) {
+    const army = [];
+    
+    // Determinar qué composición usar según el tipo de juego
+    let composition;
+    if (gameType === 'quick') {
+        // Para 10 piezas: composición simplificada
+        composition = [
+            { type: 'marshal', name: 'Mariscal', rank: 10, count: 1, symbol: '🎖️' },
+            { type: 'colonel', name: 'Coronel', rank: 8, count: 1, symbol: '🦅' },
+            { type: 'major', name: 'Comandante', rank: 7, count: 1, symbol: '⚔️' },
+            { type: 'captain', name: 'Capitán', rank: 6, count: 1, symbol: '🛡️' },
+            { type: 'lieutenant', name: 'Teniente', rank: 5, count: 1, symbol: '⚜️' },
+            { type: 'miner', name: 'Minador', rank: 3, count: 1, symbol: '⛏️' },
+            { type: 'scout', name: 'Explorador', rank: 2, count: 1, symbol: '👁️' },
+            { type: 'spy', name: 'Espía', rank: 1, count: 1, symbol: '🕵️' },
+            { type: 'bomb', name: 'Bomba', rank: 0, count: 1, symbol: '💣' },
+            { type: 'flag', name: 'Bandera', rank: -1, count: 1, symbol: '🏁' }
+        ];
+    } else {
+        // Para 40 piezas (clásico)
+        composition = ARMY_COMPOSITION;
+    }
+    
+    composition.forEach(unit => {
+        for (let i = 0; i < unit.count; i++) {
+            army.push({
+                type: unit.type,
+                name: unit.name,
+                rank: unit.rank,
+                player: player,
+                revealed: player === 'player',
+                symbol: unit.symbol,
+                id: `${unit.type}_${player}_${i}`
+            });
+        }
+    });
+    
+    return shuffleArray(army);
+}
+
+function shuffleArray(array) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
 }
 
 function handleCellClick(row, col) {
@@ -713,6 +770,11 @@ function revealPiece(row, col) {
         piece.revealed = true;
         updateCellDisplay(row, col);
         console.log(`Pieza revelada: ${piece.name} (${piece.player})`);
+        
+        // Añadir mensaje al chat
+        if (piece.player === 'opponent') {
+            addGameMessage(`🔍 ${piece.name} del oponente ha sido revelada!`);
+        }
     }
 }
 
@@ -946,6 +1008,12 @@ function setupGameEvents() {
     
     updateProtocolDisplay();
     console.log('Eventos del juego configurados');
+
+    // Botón para revelar piezas enemigas
+const revealBtn = document.getElementById('reveal-opponent-btn');
+if (revealBtn) {
+    revealBtn.addEventListener('click', revealOpponentPieces);
+}
 }
 
 function updateProtocolDisplay() {
@@ -1160,4 +1228,46 @@ setInterval(() => {
     }
 }, 1000);
 
-console.log('game.js cargado correctamente con historial funcional y combates de 7 segundos');
+
+/**
+ * Muestra todas las piezas del oponente por 5 segundos
+ */
+function revealOpponentPieces() {
+    if (window.showAllOpponentPieces) return; // Ya está activo
+    
+    window.showAllOpponentPieces = true;
+    updateAllCellsDisplay();
+    
+    // Actualizar botón
+    const revealBtn = document.getElementById('reveal-opponent-btn');
+    if (revealBtn) {
+        revealBtn.disabled = true;
+        revealBtn.innerHTML = '👁️ VISIÓN ACTIVA (5s)';
+    }
+    
+    // Después de 5 segundos, ocultar de nuevo
+    setTimeout(() => {
+        window.showAllOpponentPieces = false;
+        updateAllCellsDisplay();
+        
+        // Restaurar botón
+        if (revealBtn) {
+            revealBtn.disabled = false;
+            revealBtn.innerHTML = '👁️ VER PIEZAS ENEMIGAS';
+        }
+    }, 5000);
+}
+
+/**
+ * Actualiza todas las celdas del tablero
+ */
+function updateAllCellsDisplay() {
+    for (let row = 0; row < 10; row++) {
+        for (let col = 0; col < 10; col++) {
+            updateCellDisplay(row, col);
+        }
+    }
+}
+
+
+console.log('game.js cargado correctamente con soporte para 10 o 40 piezas');

@@ -123,19 +123,20 @@
             </div>
 
             <!-- Controles del juego -->
-            <section class="game-controls">
-                <div class="control-buttons">
-                    <button id="surrender-btn" class="btn-danger">🏳️ Rendirse</button>
-                    <button id="offer-draw-btn" class="btn-secondary">🤝 Tablas</button>
-                    <button id="save-game-btn" class="btn-secondary">💾 Guardar</button>
-                    <button id="toggle-protocol-btn" class="btn-secondary">🔄 Protocolo</button>
-                </div>
-                
-                <div class="game-status">
-                    <span id="game-status-text">En curso</span>
-                    <span class="connection-indicator connected"></span>
-                </div>
-            </section>
+           <section class="game-controls">
+    <div class="control-buttons">
+        <button id="reveal-opponent-btn" class="btn-secondary">👁️ VER PIEZAS ENEMIGAS</button>
+        <button id="surrender-btn" class="btn-danger">🏳️ Rendirse</button>
+        <button id="offer-draw-btn" class="btn-secondary">🤝 Tablas</button>
+        <button id="save-game-btn" class="btn-secondary">💾 Guardar</button>
+        <button id="toggle-protocol-btn" class="btn-secondary">🔄 Protocolo</button>
+    </div>
+    
+    <div class="game-status">
+        <span id="game-status-text">En curso</span>
+        <span class="connection-indicator connected"></span>
+    </div>
+</section>
         </main>
 
         <!-- Modal de información de pieza -->
@@ -153,68 +154,65 @@
     <script src="js/pieces.js"></script>
     <script src="js/game.js"></script>
     
-    <script>
-        // Código de inicialización simplificado
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM cargado, inicializando juego...');
-            
-            // Inicializar GameManager si existe
-            if (typeof GameManager !== 'undefined' && !window.gameManager) {
-                try {
-                    window.gameManager = new GameManager();
-                    window.gameManager.initializeGame();
-                    console.log('GameManager inicializado correctamente');
-                } catch (error) {
-                    console.error('Error al inicializar GameManager:', error);
-                    alert('Error al inicializar el juego. Recarga la página.');
+   <script>
+    // Código de inicialización corregido
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM cargado, inicializando juego...');
+        
+        // Verificar que game.js se cargó correctamente
+        try {
+            // Inicializar el juego directamente
+            if (typeof initializeGame === 'function') {
+                initializeGame();
+                console.log('Juego inicializado correctamente');
+                
+                // Configurar botón de salida
+                const logoutBtn = document.getElementById('game-logout-btn');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', function() {
+                        if (confirm('¿Salir del juego? Se perderá el progreso actual.')) {
+                            localStorage.removeItem('current_game');
+                            localStorage.removeItem('game_deployment');
+                            window.location.href = 'index.html';
+                        }
+                    });
                 }
-            } else if (window.gameManager) {
-                console.log('GameManager ya está inicializado');
-                window.gameManager.initializeGame();
+                
+                // Cargar nombre de usuario
+                const savedUser = localStorage.getItem('stratego_user');
+                if (savedUser) {
+                    try {
+                        const user = JSON.parse(savedUser);
+                        const playerNameEl = document.getElementById('game-player-name');
+                        if (playerNameEl && user.username) {
+                            playerNameEl.textContent = user.username;
+                        }
+                    } catch (e) {
+                        console.error('Error al cargar usuario:', e);
+                    }
+                }
             } else {
-                console.error('GameManager no está definido');
-                alert('Error: El juego no se pudo cargar. Verifica los archivos JavaScript.');
+                throw new Error('game.js no se cargó correctamente');
             }
-            
-            // Configurar botón de salida
-            const logoutBtn = document.getElementById('game-logout-btn');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', function() {
-                    if (confirm('¿Salir del juego? Se perderá el progreso actual.')) {
-                        localStorage.removeItem('current_game');
-                        localStorage.removeItem('game_deployment');
-                        window.location.href = 'index.html';
-                    }
-                });
-            }
-            
-            // Cargar nombre de usuario
-            const savedUser = localStorage.getItem('stratego_user');
-            if (savedUser) {
-                try {
-                    const user = JSON.parse(savedUser);
-                    const playerNameEl = document.getElementById('game-player-name');
-                    if (playerNameEl && user.username) {
-                        playerNameEl.textContent = user.username;
-                    }
-                } catch (e) {
-                    console.error('Error al cargar usuario:', e);
-                }
-            }
-        });
-        
-        // Función para mostrar mensajes de depuración
-        window.showDebugInfo = function() {
-            console.log('=== DEBUG INFO ===');
-            console.log('GameManager:', window.gameManager);
-            console.log('Board:', document.getElementById('game-board'));
-            console.log('LocalStorage deployment:', localStorage.getItem('game_deployment'));
-            console.log('LocalStorage current_game:', localStorage.getItem('current_game'));
-            console.log('==================');
-        };
-        
-        // Llamar a debug después de 2 segundos para verificar
-        setTimeout(window.showDebugInfo, 2000);
-    </script>
+        } catch (error) {
+            console.error('Error al inicializar el juego:', error);
+            alert('Error: El juego no se pudo cargar. Verifica los archivos JavaScript.');
+        }
+    });
+    
+    // Función para mostrar mensajes de depuración
+    window.showDebugInfo = function() {
+        console.log('=== DEBUG INFO ===');
+        console.log('gameState:', window.gameState);
+        console.log('initializeGame existe:', typeof initializeGame);
+        console.log('Board:', document.getElementById('game-board'));
+        console.log('LocalStorage deployment:', localStorage.getItem('game_deployment'));
+        console.log('LocalStorage current_game:', localStorage.getItem('current_game'));
+        console.log('==================');
+    };
+    
+    // Llamar a debug después de 2 segundos para verificar
+    setTimeout(window.showDebugInfo, 2000);
+</script>
 </body>
 </html>
