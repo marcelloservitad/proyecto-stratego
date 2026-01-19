@@ -71,65 +71,102 @@ function handleCellClick(row, col) {
 /**
  * Carga las piezas aliadas en el campo de batalla
  */
+/**
+ * Carga las piezas aliadas en el campo de batalla
+ */
 function cargarPiezasAliadas() {
     console.log('Cargando piezas aliadas...');
     
     // Obtener despliegue guardado
-    const deployment = JSON.parse(localStorage.getItem('game_deployment'));
-    if (!deployment) {
+    const deploymentData = localStorage.getItem('game_deployment');
+    if (!deploymentData) {
         console.error('No se encontró despliegue guardado');
         addBattleLog('Error: No se pudo cargar el despliegue de piezas', 'error');
+        return;
+    }
+    
+    let deployment;
+    try {
+        deployment = JSON.parse(deploymentData);
+    } catch (e) {
+        console.error('Error al parsear despliegue:', e);
+        addBattleLog('Error: Datos de despliegue corruptos', 'error');
+        return;
+    }
+    
+    if (!deployment.pieces || !Array.isArray(deployment.pieces)) {
+        console.error('Formato de despliegue inválido');
+        addBattleLog('Error: Formato de despliegue inválido', 'error');
         return;
     }
     
     console.log('Despliegue cargado:', deployment.pieces.length, 'piezas');
     addBattleLog(`${deployment.pieces.length} piezas aliadas cargadas`);
     
+    // Filtrar solo piezas del jugador (por si acaso)
+    const playerPieces = deployment.pieces.filter(p => p.player === 'player');
+    
     // Actualizar contadores
-    updatePieceCounters(deployment.pieces.length);
+    updatePieceCounters(playerPieces.length);
+    
+    // Colocar piezas en el campo de batalla
+    placePiecesOnBattlefield(playerPieces);
     
     // Notificar al GameManager que cargue las piezas (si está en game.html)
     if (window.gameManager && typeof window.gameManager.loadDeployment === 'function') {
         window.gameManager.loadDeployment();
-    } else {
-        // Si estamos en battlefield.html, colocar piezas visualmente
-        placePiecesOnBattlefield(deployment.pieces);
     }
 }
-
+/**
+ * Coloca piezas en el campo de batalla (para battlefield.html)
+ */
 /**
  * Coloca piezas en el campo de batalla (para battlefield.html)
  */
 function placePiecesOnBattlefield(pieces) {
-    // Limpiar tablero primero
+    console.log('Colocando', pieces.length, 'piezas en el campo de batalla');
+    
+    // Limpiar piezas anteriores primero
+    document.querySelectorAll('.battle-cell:not(.lake) .battle-piece').forEach(p => p.remove());
     document.querySelectorAll('.battle-cell:not(.lake)').forEach(cell => {
-        const row = parseInt(cell.dataset.row);
-        const col = parseInt(cell.dataset.col);
+        cell.classList.remove('occupied');
+    });
+    
+    // Colocar cada pieza en su posición
+    pieces.forEach(piece => {
+        if (!piece.position) {
+            console.warn('Pieza sin posición:', piece);
+            return;
+        }
         
-        // Solo colocar en territorio del jugador (filas 6-9)
-        if (row >= 6) {
-            const piece = pieces.find(p => 
-                p.position && 
-                (9 - p.position.row) === row && // Invertir fila
-                p.position.col === col
-            );
+        // Las piezas del jugador se despliegan en las últimas 4 filas (filas 6-9)
+        // En el tablero de 10x10, fila 0 es la parte superior
+        const row = 9 - piece.position.row; // Invertir porque el jugador está en la parte inferior
+        const col = piece.position.col;
+        
+        console.log(`Colocando ${piece.name} en (${row}, ${col}) [original: (${piece.position.row}, ${piece.position.col})]`);
+        
+        const cell = document.querySelector(`.battle-cell[data-row="${row}"][data-col="${col}"]`);
+        if (cell && !cell.classList.contains('lake')) {
+            // Crear elemento de pieza
+            const pieceDiv = document.createElement('div');
+            pieceDiv.className = 'battle-piece player';
+            pieceDiv.innerHTML = `
+                <div class="piece-symbol">${getPieceSymbol(piece.type)}</div>
+                <div class="piece-rank">${piece.rank > 0 ? piece.rank : '★'}</div>
+            `;
+            pieceDiv.title = `${piece.name} (Rango: ${piece.rank > 0 ? piece.rank : 'Especial'})`;
+            cell.appendChild(pieceDiv);
+            cell.classList.add('occupied');
             
-            if (piece) {
-                // Crear elemento de pieza
-                const pieceDiv = document.createElement('div');
-                pieceDiv.className = 'battle-piece player';
-                pieceDiv.innerHTML = `
-                    <div class="piece-symbol">${getPieceSymbol(piece.type)}</div>
-                    <div class="piece-rank">${piece.rank}</div>
-                `;
-                pieceDiv.title = `${piece.name} (Rango: ${piece.rank})`;
-                cell.appendChild(pieceDiv);
-                cell.classList.add('occupied');
-            }
+            console.log(`✓ ${piece.name} colocada en celda (${row}, ${col})`);
+        } else {
+            console.error(`No se pudo colocar ${piece.name} en (${row}, ${col}) - celda no encontrada o es lago`);
         }
     });
+    
+    console.log('Colocación de piezas completada');
 }
-
 /**
  * Obtiene el símbolo de una pieza
  */
