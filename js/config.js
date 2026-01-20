@@ -1,6 +1,6 @@
 // Variables de configuración
 let pieceInventory = null;
-let draggedPiece = null;
+let draggedPieceId = null;
 let currentFormation = null;
 let playerReady = false;
 let opponentReady = false;
@@ -29,6 +29,9 @@ function initializeConfig() {
     // Actualizar displays
     updateGameInfo();
     updateProtocolDisplay();
+    
+    // Cargar formaciones guardadas en el selector
+    loadSavedFormationsToSelector();
 }
 
 function loadGameState() {
@@ -37,7 +40,6 @@ function loadGameState() {
         AppState.currentGame = JSON.parse(savedGame);
     }
 }
-
 
 /**
  * Crea la cuadrícula de 10x4 para el despliegue del jugador.
@@ -69,11 +71,9 @@ function createDeploymentBoard() {
     }
 }
 
-
 /**
  * Renderiza la lista de piezas disponibles en el inventario lateral.
  */
-
 function renderPieceInventory() {
     const piecesList = document.getElementById('pieces-list');
     if (!piecesList) {
@@ -90,14 +90,10 @@ function renderPieceInventory() {
     });
 }
 
-
-
 /**
  * Crea el elemento visual de una pieza para el inventario.
  * @param {Piece} piece - Objeto de la pieza.
  */
-
-
 function createPieceElement(piece) {
     const div = document.createElement('div');
     div.className = 'piece-item';
@@ -122,7 +118,6 @@ function createPieceElement(piece) {
     
     return div;
 }
-
 
 function setupDragAndDrop() {
     // Configurar eventos globales
@@ -159,7 +154,6 @@ function handleDragEnter(e) {
 function handleDragLeave(e) {
     e.currentTarget.classList.remove('drag-over');
 }
-
 
 /**
  * Maneja el evento de soltar una pieza en una celda del tablero.
@@ -205,11 +199,9 @@ function getPieceAtPosition(row, col) {
     });
 }
 
-
 /**
  * Actualiza visualmente todas las celdas del tablero.
  */
-
 function updateBoardDisplay() {
     const cells = document.querySelectorAll('.board-cell.valid, .board-cell.occupied');
     
@@ -224,8 +216,25 @@ function updateBoardDisplay() {
         if (piece) {
             cell.className = 'board-cell occupied';
             
-            const pieceElement = createPieceElement(piece);
-            pieceElement.classList.add('piece-on-board');
+            // Crear elemento de pieza para el tablero (más pequeño)
+            const pieceElement = document.createElement('div');
+            pieceElement.className = 'piece-on-board';
+            
+            const imageSrc = piece.image || 'assets/default-piece.png';
+            const pieceBadge = piece.rank > 0 ? piece.rank : '';
+            
+            pieceElement.innerHTML = `
+                <div class="piece-content">
+                    <img src="${imageSrc}" alt="${piece.name}" class="piece-img" draggable="false">
+                    <div class="piece-badge">${pieceBadge}</div>
+                </div>
+                <div class="piece-label">${piece.name}</div>
+            `;
+            
+            pieceElement.draggable = true;
+            pieceElement.id = piece.id;
+            pieceElement.addEventListener('dragstart', handleDragStart);
+            pieceElement.addEventListener('dragend', handleDragEnd);
             
             cell.appendChild(pieceElement);
         } else {
@@ -233,7 +242,6 @@ function updateBoardDisplay() {
         }
     });
 }
-
 
 /**
  * Configura los botones de acción de la interfaz.
@@ -248,8 +256,18 @@ function setupConfigEventListeners() {
     if (readyBtn) {
         readyBtn.addEventListener('click', toggleReady);
     }
+    
+    // Botones de formaciones - ¡ESTOS FALTABAN!
+    const saveFormationBtn = document.getElementById('save-formation-btn');
+    if (saveFormationBtn) {
+        saveFormationBtn.addEventListener('click', saveFormation);
+    }
+    
+    const loadFormationBtn = document.getElementById('load-formation-btn');
+    if (loadFormationBtn) {
+        loadFormationBtn.addEventListener('click', loadFormationsModal);
+    }
 }
-
 
 /**
  * Distribuye todas las piezas en el tablero de forma aleatoria.
@@ -289,7 +307,9 @@ function randomizeDeployment() {
     checkDeploymentComplete();
 }
 
-
+/**
+ * Guarda la formación actual en localStorage.
+ */
 function saveFormation() {
     if (!pieceInventory.isDeploymentComplete()) {
         alert('¡Completa el despliegue primero!');
@@ -297,86 +317,204 @@ function saveFormation() {
     }
     
     const formationName = prompt('Nombre para esta formación:', 
-        `Formación_${new Date().toLocaleDateString()}`);
+        `Formación_${new Date().toLocaleDateString('es-ES')}`);
     
-    if (formationName) {
-        const formation = {
-            name: formationName,
-            date: new Date().toISOString(),
-            pieces: pieceInventory.getPlacedPieces().map(piece => ({
-                type: piece.type,
-                position: piece.position
-            }))
-        };
-        
-        // Guardar en localStorage
-        const savedFormations = JSON.parse(localStorage.getItem('saved_formations') || '[]');
-        savedFormations.push(formation);
-        localStorage.setItem('saved_formations', JSON.stringify(savedFormations));
-        
-        alert(`Formación "${formationName}" guardada exitosamente.`);
+    if (!formationName) {
+        return; // El usuario canceló
     }
+    
+    // Obtener todas las piezas colocadas
+    const placedPieces = pieceInventory.getPlacedPieces();
+    
+    // Crear un objeto de formación que solo guarda la información esencial
+    const formation = {
+        name: formationName,
+        date: new Date().toISOString(),
+        gameType: AppState.currentGame.gameType,
+        pieces: placedPieces.map(piece => ({
+            type: piece.type,
+            name: piece.name,
+            rank: piece.rank,
+            position: { ...piece.position } // Copia del objeto posición
+        }))
+    };
+    
+    // Guardar en localStorage
+    const savedFormations = JSON.parse(localStorage.getItem('saved_formations') || '[]');
+    
+    // Verificar si ya existe una formación con ese nombre
+    const existingIndex = savedFormations.findIndex(f => f.name === formationName);
+    
+    if (existingIndex !== -1) {
+        if (confirm(`¿Reemplazar la formación "${formationName}" existente?`)) {
+            savedFormations[existingIndex] = formation;
+        } else {
+            return; // Usuario canceló
+        }
+    } else {
+        savedFormations.push(formation);
+    }
+    
+    localStorage.setItem('saved_formations', JSON.stringify(savedFormations));
+    
+    alert(`Formación "${formationName}" guardada exitosamente.`);
+    
+    // Actualizar el selector de formaciones
+    loadSavedFormationsToSelector();
 }
 
+/**
+ * Carga las formaciones guardadas en el selector dropdown.
+ */
+function loadSavedFormationsToSelector() {
+    const formationSelector = document.getElementById('saved-formations');
+    if (!formationSelector) return;
+    
+    const savedFormations = JSON.parse(localStorage.getItem('saved_formations') || '[]');
+    
+    // Limpiar opciones excepto la primera
+    formationSelector.innerHTML = '<option value="">Formaciones guardadas...</option>';
+    
+    // Agregar las formaciones guardadas
+    savedFormations.forEach((formation, index) => {
+        const date = new Date(formation.date).toLocaleDateString('es-ES');
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = `${formation.name} (${date}) - ${formation.gameType === 'quick' ? '10 piezas' : '40 piezas'}`;
+        formationSelector.appendChild(option);
+    });
+    
+    // Agregar evento para cargar formación seleccionada
+    formationSelector.addEventListener('change', function() {
+        if (this.value !== '') {
+            loadFormation(parseInt(this.value));
+            this.value = ''; // Resetear selector
+        }
+    });
+}
+
+/**
+ * Muestra el modal con las formaciones guardadas.
+ */
 function loadFormationsModal() {
     const savedFormations = JSON.parse(localStorage.getItem('saved_formations') || '[]');
     const modalContent = document.getElementById('saved-formations-list');
+    const modal = document.getElementById('formations-modal');
+    
+    if (!modalContent || !modal) return;
     
     if (savedFormations.length === 0) {
-        modalContent.innerHTML = '<p>No hay formaciones guardadas.</p>';
+        modalContent.innerHTML = '<p class="empty-formations">No hay formaciones guardadas.</p>';
     } else {
-        modalContent.innerHTML = savedFormations.map((formation, index) => `
-            <div class="formation-item" data-index="${index}">
-                <h4>${formation.name}</h4>
-                <p>Guardada: ${new Date(formation.date).toLocaleDateString()}</p>
-                <button class="btn-secondary" onclick="loadFormation(${index})">
-                    Cargar
-                </button>
-                <button class="btn-danger" onclick="deleteFormation(${index})">
-                    Eliminar
-                </button>
-            </div>
-        `).join('');
+        modalContent.innerHTML = savedFormations.map((formation, index) => {
+            const date = new Date(formation.date).toLocaleDateString('es-ES');
+            const pieceCount = formation.pieces.length;
+            const gameType = formation.gameType === 'quick' ? 'Duelo Rápido (10)' : 'Guerra Clásica (40)';
+            
+            return `
+                <div class="formation-item" data-index="${index}">
+                    <h4>${formation.name}</h4>
+                    <p>${date} | ${gameType} piezas | ${pieceCount} colocadas</p>
+                    <div class="formation-actions">
+                        <button class="btn-secondary" onclick="window.loadFormation(${index})">
+                            Cargar
+                        </button>
+                        <button class="btn-danger" onclick="window.deleteFormation(${index})">
+                            Eliminar
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
     
-    document.getElementById('formations-modal').classList.remove('hidden');
+    modal.classList.remove('hidden');
 }
 
-function closeFormationsModal() {
-    document.getElementById('formations-modal').classList.add('hidden');
-}
-
+/**
+ * Carga una formación específica desde localStorage.
+ * @param {number} index - Índice de la formación a cargar.
+ */
 function loadFormation(index) {
     const savedFormations = JSON.parse(localStorage.getItem('saved_formations') || '[]');
-    if (savedFormations[index]) {
-        // Limpiar despliegue actual
-        pieceInventory.getPlacedPieces().forEach(piece => {
-            piece.position = null;
-        });
+    if (!savedFormations[index]) {
+        alert('Formación no encontrada');
+        return;
+    }
+    
+    const formation = savedFormations[index];
+    
+    // Verificar que el tipo de juego coincide
+    if (formation.gameType !== AppState.currentGame.gameType) {
+        alert(`Esta formación es para ${formation.gameType === 'quick' ? 'Duelo Rápido' : 'Guerra Clásica'}. No coincide con el modo actual.`);
+        return;
+    }
+    
+    // Limpiar despliegue actual
+    pieceInventory.pieces.forEach(piece => {
+        piece.position = null;
+    });
+    
+    // Aplicar formación guardada
+    let loadedCount = 0;
+    formation.pieces.forEach(pieceData => {
+        // Buscar una pieza del mismo tipo que no tenga posición
+        const piece = pieceInventory.pieces.find(p => 
+            p.type === pieceData.type && !p.position
+        );
         
-        // Aplicar formación guardada
-        const formation = savedFormations[index];
-        formation.pieces.forEach(pieceData => {
-            const piece = pieceInventory.pieces.find(p => p.type === pieceData.type && !p.position);
-            if (piece) {
-                piece.position = pieceData.position;
-            }
-        });
+        if (piece) {
+            piece.position = { ...pieceData.position };
+            loadedCount++;
+        }
+    });
+    
+    if (loadedCount < formation.pieces.length) {
+        console.warn(`No se pudieron cargar todas las piezas. Cargadas: ${loadedCount}/${formation.pieces.length}`);
+    }
+    
+    updateBoardDisplay();
+    renderPieceInventory();
+    checkDeploymentComplete();
+    
+    // Cerrar modal si está abierto
+    const modal = document.getElementById('formations-modal');
+    if (modal) modal.classList.add('hidden');
+    
+    alert(`Formación "${formation.name}" cargada (${loadedCount} piezas)`);
+}
+
+/**
+ * Elimina una formación guardada.
+ * @param {number} index - Índice de la formación a eliminar.
+ */
+function deleteFormation(index) {
+    if (!confirm('¿Eliminar esta formación permanentemente?')) {
+        return;
+    }
+    
+    const savedFormations = JSON.parse(localStorage.getItem('saved_formations') || '[]');
+    
+    if (index >= 0 && index < savedFormations.length) {
+        const formationName = savedFormations[index].name;
+        savedFormations.splice(index, 1);
+        localStorage.setItem('saved_formations', JSON.stringify(savedFormations));
         
-        updateBoardDisplay();
-        renderPieceInventory();
-        checkDeploymentComplete();
-        closeFormationsModal();
+        // Recargar la lista en el modal
+        loadFormationsModal();
+        // Actualizar el selector
+        loadSavedFormationsToSelector();
+        
+        alert(`Formación "${formationName}" eliminada.`);
     }
 }
 
-function deleteFormation(index) {
-    if (confirm('¿Eliminar esta formación permanentemente?')) {
-        const savedFormations = JSON.parse(localStorage.getItem('saved_formations') || '[]');
-        savedFormations.splice(index, 1);
-        localStorage.setItem('saved_formations', JSON.stringify(savedFormations));
-        loadFormationsModal(); // Recargar la lista
-    }
+/**
+ * Cierra el modal de formaciones.
+ */
+function closeFormationsModal() {
+    const modal = document.getElementById('formations-modal');
+    if (modal) modal.classList.add('hidden');
 }
 
 function toggleReady() {
@@ -438,14 +576,15 @@ function updateReadyStatus() {
     }
 }
 
-
 function saveFinalDeployment() {
     const deployment = {
         gameId: AppState.currentGame.id,
         player: AppState.user ? AppState.user.id : 'invitado',
+        gameType: AppState.currentGame.gameType,
         pieces: pieceInventory.getPlacedPieces().map(piece => ({
             id: piece.id,
             type: piece.type,
+            name: piece.name,
             rank: piece.rank,
             position: piece.position,
             image: piece.image,
@@ -467,14 +606,20 @@ function checkDeploymentComplete() {
     }
 }
 
-
 function updateGameInfo() {
-    document.getElementById('game-mode-display').textContent = 
-        AppState.currentGame.gameType === 'classic' ? 
-        'Guerra Clásica (40 piezas)' : 'Duelo Rápido (10 piezas)';
+    const gameModeDisplay = document.getElementById('game-mode-display');
+    const opponentInfo = document.getElementById('opponent-info');
     
-    document.getElementById('opponent-info').textContent = 
-        `vs ${AppState.currentGame.opponent.username}`;
+    if (gameModeDisplay) {
+        gameModeDisplay.textContent = 
+            AppState.currentGame.gameType === 'classic' ? 
+            'Guerra Clásica (40 piezas)' : 'Duelo Rápido (10 piezas)';
+    }
+    
+    if (opponentInfo && AppState.currentGame.opponent) {
+        opponentInfo.textContent = 
+            `vs ${AppState.currentGame.opponent.username || 'Oponente'}`;
+    }
 }
 
 function updateProtocolDisplay() {
@@ -482,59 +627,18 @@ function updateProtocolDisplay() {
     const secondaryProtocol = document.getElementById('secondary-protocol');
     
     if (AppState.connection.protocolMode === 'SOCKET_FIRST') {
-        mainProtocol.textContent = 'WebSockets (Movimientos)';
-        secondaryProtocol.textContent = 'Fetch + SSE (Chat)';
+        if (mainProtocol) mainProtocol.textContent = 'WebSockets (Movimientos)';
+        if (secondaryProtocol) secondaryProtocol.textContent = 'Fetch + SSE (Chat)';
     } else {
-        mainProtocol.textContent = 'Fetch + SSE (Movimientos)';
-        secondaryProtocol.textContent = 'WebSockets (Chat)';
+        if (mainProtocol) mainProtocol.textContent = 'Fetch + SSE (Movimientos)';
+        if (secondaryProtocol) secondaryProtocol.textContent = 'WebSockets (Chat)';
     }
 }
 
-function sendPrivateMessage() {
-    const input = document.getElementById('private-message-input');
-    const message = input.value.trim();
-    
-    if (message && AppState.currentGame.mode === 'pvp') {
-        Comms.sendChatMessage({
-            type: 'private_chat',
-            message: message,
-            to: AppState.currentGame.opponent.id
-        });
-        
-        addPrivateChatMessage(AppState.user.username, message, true);
-        input.value = '';
-    }
-}
-
-function addPrivateChatMessage(sender, message, isOwn) {
-    const chatMessages = document.getElementById('private-chat-messages');
-    const messageDiv = document.createElement('div');
-    
-    messageDiv.className = `message ${isOwn ? 'sender' : 'player'}`;
-    messageDiv.innerHTML = `
-        <strong>${sender}:</strong> ${message}
-        <span class="message-time">${new Date().toLocaleTimeString()}</span>
-    `;
-    
-    chatMessages.appendChild(messageDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-function cancelGame() {
-    if (confirm('¿Retirarse antes de la batalla?')) {
-        if (AppState.currentGame.mode === 'pvp') {
-            Comms.sendMessage({
-                type: 'player_quit',
-                gameId: AppState.currentGame.id
-            });
-        }
-        
-        // Limpiar y volver al lobby
-        localStorage.removeItem('current_game');
-        localStorage.removeItem('game_deployment');
-        window.location.href = 'index.html';
-    }
-}
+// Hacer funciones disponibles globalmente para los onclick en HTML
+window.loadFormation = loadFormation;
+window.deleteFormation = deleteFormation;
+window.closeFormationsModal = closeFormationsModal;
 
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
@@ -542,4 +646,3 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeConfig();
     }
 });
-

@@ -1,3 +1,5 @@
+/* battlefield.css */
+
 :root {
     --bg-dark: #0f0f1e;
     --bg-medium: #1a1a2e;
@@ -6,7 +8,7 @@
     --accent-player: #4cd137;
     --lake-blue: #22a6b3;
     --text-main: #e2e2e2;
-    --cell-size: 60px;
+    --cell-size: min(60px, 5vw, 5vh); /* Tamaño responsivo */
     --border-radius: 8px;
 }
 
@@ -17,38 +19,41 @@ body {
     background-color: var(--bg-dark);
     color: var(--text-main);
     height: 100vh;
+    overflow: hidden; /* Evitar scroll en body */
 }
 
 .battle-scene-wrapper {
-    display: grid;
-    grid-template-rows: auto 1fr;
+    display: flex;
+    flex-direction: column;
     height: 100vh;
-    padding: 1rem;
+    padding: 0.5rem;
     box-sizing: border-box;
-    gap: 1rem;
+    gap: 0.5rem;
+    overflow: hidden;
 }
 
-/* CABECERA */
+/* CABECERA - Más compacta */
 .game-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     background: var(--bg-light);
-    padding: 12px 30px;
-    border-radius: 10px;
-    border-bottom: 4px solid var(--accent-enemy);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    padding: 8px 15px;
+    border-radius: 8px;
+    border-bottom: 3px solid var(--accent-enemy);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    flex-shrink: 0; /* Evitar que se encoja */
 }
 
 .player-info {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
 }
 
 .enemy-avatar {
-    width: 45px;
-    height: 45px;
+    width: 35px;
+    height: 35px;
     background-color: #2d3436;
     border: 2px solid var(--accent-enemy);
     border-radius: 50%;
@@ -56,34 +61,36 @@ body {
 
 .enemy-name {
     margin: 0;
-    font-size: 1rem;
-    letter-spacing: 1px;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
 }
 
 .timer-label {
-    font-size: 0.65rem;
-    letter-spacing: 2px;
+    font-size: 0.6rem;
+    letter-spacing: 1px;
     opacity: 0.7;
 }
 
 .timer-value {
-    font-size: 1.4rem;
+    font-size: 1.1rem;
     font-weight: bold;
     color: var(--accent-player);
 }
 
 .counter-num {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: bold;
     text-align: center;
 }
 
-/* ÁREA DE JUEGO */
+/* ÁREA DE JUEGO - Responsiva */
 .battle-main {
     display: grid;
-    grid-template-columns: 1fr 320px;
-    gap: 1.5rem;
+    grid-template-columns: 1fr 250px; /* Sidebar más estrecho */
+    gap: 0.75rem;
     overflow: hidden;
+    flex: 1; /* Tomar espacio restante */
+    min-height: 0; /* Necesario para que funcione el overflow */
 }
 
 .board-container {
@@ -91,19 +98,22 @@ body {
     justify-content: center;
     align-items: center;
     background: rgba(0,0,0,0.2);
-    border-radius: 12px;
+    border-radius: 8px;
+    overflow: auto; /* Permitir scroll si el tablero es muy grande */
+    padding: 5px;
 }
 
 .battlefield-grid {
     display: grid;
     grid-template-columns: repeat(10, var(--cell-size));
     grid-template-rows: repeat(10, var(--cell-size));
-    gap: 2px;
+    gap: 1px;
     background-color: #0f3460;
-    padding: 8px;
-    border: 4px solid #16213e;
+    padding: 5px;
+    border: 3px solid #16213e;
     border-radius: var(--border-radius);
-    box-shadow: 0 0 40px rgba(0,0,0,0.6);
+    box-shadow: 0 0 20px rgba(0,0,0,0.6);
+    margin: auto; /* Centrar */
 }
 
 /* CELDAS */
@@ -113,74 +123,252 @@ body {
     background-color: var(--bg-medium);
     position: relative;
     cursor: pointer;
+    border-radius: 3px;
 }
 
 .battle-cell.lake {
     background-color: var(--lake-blue);
     background-image: radial-gradient(circle, rgba(255,255,255,0.2) 1px, transparent 1px);
-    background-size: 8px 8px;
+    background-size: 6px 6px;
     cursor: not-allowed;
 }
 
-/* SIDEBAR */
+/* Piezas dentro de las celdas */
+.battle-piece {
+    width: 90%;
+    height: 90%;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+}
+
+.battle-piece.player {
+    background: linear-gradient(135deg, #3182ce, #2c5282);
+    color: white;
+    border: 2px solid #63b3ed;
+}
+
+.piece-symbol {
+    font-size: 1.2rem;
+}
+
+.piece-rank {
+    font-size: 0.7rem;
+    font-weight: bold;
+    margin-top: 2px;
+}
+
+/* SIDEBAR - Más compacto */
 .battle-sidebar {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.75rem;
+    overflow: hidden;
 }
 
 .log-container {
-    flex: 2;
+    flex: 1;
     background: var(--bg-light);
     border-radius: var(--border-radius);
-    padding: 15px;
+    padding: 10px;
     display: flex;
     flex-direction: column;
+    min-height: 0; /* Necesario para scroll interno */
+}
+
+.log-container h4 {
+    margin: 0 0 8px 0;
+    font-size: 0.9rem;
 }
 
 .log-messages {
     flex: 1;
     overflow-y: auto;
     background: var(--bg-dark);
-    margin-top: 10px;
-    padding: 10px;
+    padding: 8px;
     border-radius: 4px;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
+    line-height: 1.3;
+}
+
+.log-messages p {
+    margin: 4px 0;
 }
 
 .inventory-status {
     background: var(--bg-light);
-    padding: 15px;
+    padding: 10px;
     border-radius: var(--border-radius);
+    flex-shrink: 0;
+}
+
+.inventory-status h4 {
+    margin: 0 0 8px 0;
+    font-size: 0.9rem;
 }
 
 .mini-status-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 10px;
+    gap: 8px;
+    margin-top: 5px;
 }
 
 .status-item {
     background: var(--bg-dark);
-    padding: 8px;
-    border-radius: 6px;
+    padding: 6px;
+    border-radius: 5px;
     text-align: center;
     border-left: 3px solid var(--accent-player);
+    font-size: 0.8rem;
 }
 
 .btn-surrender {
     background: linear-gradient(to bottom, #e94560, #a01a30);
     color: white;
     border: none;
-    padding: 15px;
+    padding: 12px;
     border-radius: var(--border-radius);
     font-weight: bold;
     cursor: pointer;
     transition: 0.2s;
+    font-size: 0.9rem;
+    flex-shrink: 0;
 }
 
 .btn-surrender:hover {
     filter: brightness(1.2);
-    transform: translateY(-2px);
+    transform: translateY(-1px);
+}
+
+/* Botón de continuar a juego completo */
+.btn-continue {
+    background: linear-gradient(to bottom, #4cd137, #2a8a1c);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: var(--border-radius);
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/* RESPONSIVE PARA PANTALLAS PEQUEÑAS */
+@media (max-width: 1024px) {
+    :root {
+        --cell-size: min(50px, 4.5vw, 4.5vh);
+    }
+    
+    .battle-main {
+        grid-template-columns: 1fr 200px;
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    :root {
+        --cell-size: min(40px, 4vw, 4vh);
+    }
+    
+    .battle-scene-wrapper {
+        padding: 0.25rem;
+        gap: 0.25rem;
+    }
+    
+    .battle-main {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 300px;
+        gap: 0.5rem;
+    }
+    
+    .board-container {
+        grid-row: 1;
+    }
+    
+    .battle-sidebar {
+        grid-row: 2;
+        max-height: 300px;
+    }
+    
+    .game-header {
+        flex-direction: column;
+        gap: 8px;
+        padding: 8px;
+    }
+    
+    .player-info {
+        order: 1;
+    }
+    
+    .turn-timer {
+        order: 2;
+    }
+    
+    .captured-counter {
+        order: 3;
+    }
+}
+
+@media (max-width: 480px) {
+    :root {
+        --cell-size: min(35px, 3.5vw, 3.5vh);
+    }
+    
+    .battlefield-grid {
+        gap: 0.5px;
+        padding: 3px;
+    }
+    
+    .battle-main {
+        grid-template-rows: auto 250px;
+    }
+    
+    .battle-sidebar {
+        max-height: 250px;
+    }
+}
+
+/* Para pantallas muy pequeñas en altura */
+@media (max-height: 600px) {
+    :root {
+        --cell-size: min(45px, 4vw, 4.5vh);
+    }
+    
+    .battle-scene-wrapper {
+        padding: 0.25rem;
+        gap: 0.25rem;
+    }
+    
+    .game-header {
+        padding: 6px 10px;
+    }
+    
+    .battle-main {
+        gap: 0.5rem;
+    }
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-medium);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent-enemy);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #c53030;
 }

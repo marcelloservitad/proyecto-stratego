@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stratego - Resultados</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/postgame.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>📊 Resultados de la Batalla</h1>
+            <nav class="user-info">
+                <button onclick="window.location.href='/html/etapa-1/lobby.html'" class="btn-primary">🏠 Volver al Lobby</button>
+            </nav>
+        </header>
+
+        <main class="postgame-container">
+            <section class="victory-section">
+                <div class="victory-banner" id="victory-banner">
+                    <h2 id="result-title">¡VICTORIA!</h2>
+                    <p id="result-subtitle">Has demostrado tu valía, General</p>
+                </div>
+                
+                <div class="result-details">
+                    <div class="result-card">
+                        <h3>📈 Estadísticas de la Partida</h3>
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <span class="stat-label">Duración</span>
+                                <span class="stat-value" id="game-duration">15:32</span>
+                            </div>
+                            <div class="stat-box">
+                                <span class="stat-label">Movimientos</span>
+                                <span class="stat-value" id="total-moves">42</span>
+                            </div>
+                            <div class="stat-box">
+                                <span class="stat-label">Piezas restantes</span>
+                                <span class="stat-value" id="pieces-remaining">18</span>
+                            </div>
+                            <div class="stat-box">
+                                <span class="stat-label">Tipo de victoria</span>
+                                <span class="stat-value" id="victory-type">Captura de bandera</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3>🎖️ Recompensas</h3>
+                        <div class="rewards-list">
+                            <div class="reward-item">
+                                <span class="reward-icon">⭐</span>
+                                <span class="reward-text">+10 puntos de rating</span>
+                            </div>
+                            <div class="reward-item">
+                                <span class="reward-icon">🏆</span>
+                                <span class="reward-text">Victoria registrada</span>
+                            </div>
+                            <div class="reward-item">
+                                <span class="reward-icon">📈</span>
+                                <span class="reward-text">Nueva estrategia desbloqueada</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button onclick="window.location.href='/html/etapa-1/lobby.html'" class="btn-success btn-large">
+                        🏠 Volver al Lobby
+                    </button>
+                    <button onclick="window.location.href='config.html'" class="btn-primary btn-large">
+                        🔄 Revancha
+                    </button>
+                    <button id="share-result" class="btn-secondary">
+                        📤 Compartir resultado
+                    </button>
+                </div>
+                
+                <div class="history-section">
+                    <h3>📋 Historial Reciente</h3>
+                    <div class="history-list" id="recent-games">
+                        <!-- Partidas recientes cargadas por JavaScript -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="js/postgame.js"></script>
+</body>
+</html>

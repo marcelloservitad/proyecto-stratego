@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Stratego - Etapa II: Despliegue</title>
+    <link rel="stylesheet" href="../../css/etapa-2/setup.css" />
+</head>
+<body>
+    <header class="app-header">
+        <h1>Etapa II: Despliegue</h1>
+        <p class="subtitle">Organiza tus tropas antes de iniciar la batalla</p>
+    </header>
+
+    <main class="app-main">
+        <section class="layout">
+            <section class="card" aria-labelledby="boardTitle">
+                <header class="card-header">
+                    <h2 id="boardTitle">Tablero 10x10</h2>
+                    <p class="muted" id="matchMeta">
+                        <p class="status-line" id="readyStatusText">Tú: No listo • Oponente: No listo</p>
+                        Partida: <span id="matchIdText">—</span> • Equipo: <span id="teamText">—</span> • Modo:
+                        <span id="modeText">—</span>
+                    </p>
+                </header>
+
+                <article class="card-body">
+                    <section class="board-wrap">
+                        <section class="board" id="board" aria-label="Tablero de juego"></section>
+
+                        <section class="board-note" aria-live="polite">
+                            <p class="muted" id="boardNoteText">
+                                Solo puedes desplegar en tu zona (4 filas). Los lagos están bloqueados.
+                            </p>
+                        </section>
+                    </section>
+
+                    <section class="legend" aria-label="Leyenda del terreno">
+                        <span class="legend-item">
+                            <span class="legend-swatch lake"></span> Lago (bloqueado)
+                        </span>
+                        <span class="legend-item">
+                            <span class="legend-swatch deploy-zone"></span> Tu zona de despliegue
+                        </span>
+                        <span class="legend-item">
+                            <span class="legend-swatch hidden-zone"></span> Zona oculta para ti
+                        </span>
+                    </section>
+                </article>
+            </section>
+
+            <aside class="card" aria-labelledby="sideTitle">
+                <header class="card-header">
+                    <h2 id="sideTitle">Inventario</h2>
+                    <p class="muted">Arrastra piezas al tablero o usa Despliegue aleatorio.</p>
+                </header>
+
+                <article class="card-body">
+                    <section class="panel" aria-label="Resumen">
+                        <ul class="summary">
+                            <li>Requeridas: <strong id="requiredCountText">—</strong></li>
+                            <li>Colocadas: <strong id="placedCountText">0</strong></li>
+                            <li>Restantes: <strong id="remainingCountText">—</strong></li>
+                        </ul>
+                    </section>
+
+                    <section class="panel" aria-label="Piezas disponibles">
+                        <h3>Piezas disponibles</h3>
+                        <section id="inventory" class="inventory" aria-label="Inventario de piezas"></section>
+                        <p class="hint">Puedes arrastrar una pieza desde aquí al tablero.</p>
+                    </section>
+
+                    <section class="panel" aria-label="Piezas colocadas">
+                        <h3>Retirar pieza</h3>
+                        <section id="trash" class="trash" aria-label="Zona para devolver piezas">
+                            Arrastra aquí una pieza del tablero para devolverla al inventario.
+                        </section>
+                    </section>
+
+                    <section class="actions" aria-label="Acciones">
+                        <button id="randomDeployButton" type="button">Despliegue aleatorio</button>
+                        <button id="readyButton" type="button" disabled>LISTO</button>
+                        <button id="btnBackToLobby" class="btn secondary">Abandonar y Volver al Lobby</button>
+                        <p class="hint">
+                            La partida inicia cuando ambos presionan LISTO (lo conectamos al servidor en el siguiente paso).
+                        </p>
+                        <p id="realtimeStatusText" class="hint" aria-live="polite">
+                            Estado: esperando que presiones LISTO.</p>
+
+                    </section>
+                </article>
+            </aside>
+        </section>
+    </main>
+
+    <footer class="app-footer">
+        <small>Stratego • Etapa II • Setup</small>
+    </footer>
+
+    <script src="../../js/etapa-2/setup.js" defer></script>
+</body>
+</html>

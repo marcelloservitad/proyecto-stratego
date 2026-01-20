@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stratego - Reporte de Batalla</title>
+    <link rel="stylesheet" href="../../css/etapa-3/match.css">
+    <style>
+        /* Estilos específicos para el reporte */
+        .report-container {
+            max-width: 600px;
+            margin: 50px auto;
+            text-align: center;
+            padding: 40px;
+        }
+        .outcome-title {
+            font-size: 4rem;
+            margin: 0;
+            text-transform: uppercase;
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
+        .outcome-reason {
+            font-size: 1.5rem;
+            color: #888;
+            margin-bottom: 40px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 40px;
+            text-align: left;
+        }
+        .stat-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            padding: 20px;
+            border-radius: 12px;
+        }
+        .stat-label { font-size: 0.9rem; color: #6b7280; }
+        .stat-value { font-size: 1.2rem; font-weight: bold; color: #111827; }
+        
+        /* Colores de estado */
+        .win-theme .outcome-title { color: #2ecc71; text-shadow: 0 0 20px rgba(46, 204, 113, 0.4); }
+        .lose-theme .outcome-title { color: #e74c3c; text-shadow: 0 0 20px rgba(231, 76, 60, 0.4); }
+        
+        .btn-exit {
+            background: #111827;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .btn-exit:hover { transform: scale(1.05); }
+    </style>
+</head>
+<body>
+
+    <main class="app-main">
+        <section class="card report-container" id="report-card">
+            
+            <h1 id="outcome-text" class="outcome-title">Cargando...</h1>
+            <p id="reason-text" class="outcome-reason">Obteniendo datos del servidor</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Ganador</div>
+                    <div class="stat-value" id="winner-name">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Duración</div>
+                    <div class="stat-value" id="match-duration">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Tu Equipo</div>
+                    <div class="stat-value" id="my-team">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">ID Partida</div>
+                    <div class="stat-value" id="match-id-display" style="font-size: 0.8rem; word-break: break-all;">-</div>
+                </div>
+            </div>
+
+            <button id="btnBackToLobby" class="btn-exit">Volver al Lobby</button>
+
+        </section>
+    </main>
+
+    <script src="../../js/etapa-4/report.js"></script>
+</body>
+</html>

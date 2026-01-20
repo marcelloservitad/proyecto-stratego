@@ -91,7 +91,7 @@ function generateId() {
 }
 
 function initializeWebSocket() {
-    const wsUrl = 'ws://localhost:3000'; // Cambiar según  el servidor
+    const wsUrl = 'ws://localhost:3000'; // Cambiar según el servidor
     AppState.connection.ws = new WebSocket(wsUrl);
     
     AppState.connection.ws.onopen = () => {
@@ -188,11 +188,20 @@ function setupEventListeners() {
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
             localStorage.removeItem('stratego_user');
-            location.reload();
+            localStorage.removeItem('current_game');
+            window.location.href = 'index.html';
         });
     }
     
-
+    // Botón de logout en el juego (si existe)
+    const gameLogoutBtn = document.getElementById('game-logout-btn');
+    if (gameLogoutBtn) {
+        gameLogoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('current_game');
+            localStorage.removeItem('game_deployment');
+            window.location.href = 'index.html';
+        });
+    }
 }
 
 // Funciones dummy para evitar errores 

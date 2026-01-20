@@ -1,0 +1,1108 @@
+/* battlefield.css */
+
+:root {
+    --bg-dark: #0f0f1e;
+    --bg-medium: #1a1a2e;
+    --bg-light: #16213e;
+    --accent-color: #e53e3e;
+    --success-color: #38a169;
+    --warning-color: #d69e2e;
+    --info-color: #3182ce;
+    --text-main: #e2e2e2;
+    --border-radius: 8px;
+    --cell-size-game: min(50px, 4.5vw, 4.5vh); /* Tamaño responsivo */
+}
+
+.game-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    height: calc(100vh - 80px);
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* CONTENEDOR PRINCIPAL DEL JUEGO */
+.game-main {
+    display: flex;
+    flex: 1;
+    gap: 1rem;
+    overflow: hidden;
+    min-height: 0;
+}
+
+/* TABLERO DE JUEGO */
+.game-board {
+    flex: 2;
+    background-color: var(--bg-medium);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+}
+
+.game-board h2 {
+    margin: 0 0 1rem 0;
+    font-size: 1.2rem;
+    color: var(--warning-color);
+    flex-shrink: 0;
+}
+
+.board-full {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+    gap: 2px;
+    background-color: var(--bg-light);
+    padding: 5px;
+    border-radius: var(--border-radius);
+    flex: 1;
+    min-height: 300px;
+    overflow: hidden;
+}
+
+.board-full-cell {
+    background-color: var(--bg-dark);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 4px;
+    min-height: 20px;
+}
+
+.board-full-cell.player-territory {
+    background-color: rgba(72, 187, 120, 0.05);
+}
+
+.board-full-cell.opponent-territory {
+    background-color: rgba(237, 137, 54, 0.05);
+}
+
+.board-full-cell.lake {
+    background-color: rgba(66, 153, 225, 0.3);
+    cursor: not-allowed;
+    border-color: var(--info-color);
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.board-full-cell.selected {
+    border: 2px solid var(--info-color);
+    background-color: rgba(66, 153, 225, 0.2);
+}
+
+.board-full-cell.valid-move {
+    border: 2px dashed var(--success-color);
+    background-color: rgba(72, 187, 120, 0.2);
+    cursor: pointer;
+}
+
+.board-full-cell.attack-target {
+    border: 2px solid var(--accent-color);
+    background-color: rgba(229, 62, 62, 0.2);
+    animation: pulse-red 1s infinite;
+}
+
+@keyframes pulse-red {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* SIDEBAR DERECHO */
+.game-sidebar {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 250px;
+    max-width: 350px;
+    overflow: hidden;
+}
+
+/* PANEL DE INFORMACIÓN */
+.game-info-panel {
+    background-color: var(--bg-medium);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.turn-indicator {
+    text-align: center;
+    padding: 0.8rem;
+    background-color: var(--bg-light);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.turn-indicator.your-turn {
+    background: linear-gradient(135deg, var(--success-color), #276749);
+    color: white;
+    animation: pulse-green 1.5s infinite;
+}
+
+.turn-indicator.opponent-turn {
+    background: linear-gradient(135deg, var(--accent-color), #9b2c2c);
+    color: white;
+}
+
+@keyframes pulse-green {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
+.player-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--bg-light);
+}
+
+.stat-item {
+    text-align: center;
+    padding: 0.5rem;
+    background: var(--bg-dark);
+    border-radius: var(--border-radius);
+}
+
+.stat-value {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--warning-color);
+    display: block;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--text-main);
+    display: block;
+    margin-top: 0.2rem;
+}
+
+.protocol-display-game {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.8rem;
+    background-color: var(--bg-light);
+    border-radius: var(--border-radius);
+    font-family: monospace;
+    font-size: 0.8rem;
+    justify-content: center;
+}
+
+/* HISTORIAL DE MOVIMIENTOS */
+.move-history-container {
+    background: var(--bg-dark);
+    border-radius: var(--border-radius);
+    padding: 0.8rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 150px;
+    max-height: 200px;
+}
+
+.move-history-container h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+    color: var(--warning-color);
+}
+
+.move-history {
+    flex: 1;
+    overflow-y: auto;
+    background-color: var(--bg-light);
+    border-radius: 4px;
+    padding: 0.5rem;
+    font-size: 0.75rem;
+}
+
+.move-item {
+    padding: 0.3rem 0.5rem;
+    margin-bottom: 0.25rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    font-size: 0.7rem;
+    display: flex;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* CHAT DEL JUEGO */
+.game-chat {
+    background-color: var(--bg-medium);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 200px;
+    max-height: 300px;
+    overflow: hidden;
+}
+
+.game-chat h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+    color: var(--warning-color);
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    background-color: var(--bg-dark);
+    border-radius: 4px;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.message {
+    padding: 0.4rem 0.6rem;
+    margin-bottom: 0.4rem;
+    border-radius: var(--border-radius);
+    font-size: 0.8rem;
+}
+
+.message.system {
+    background-color: rgba(66, 153, 225, 0.2);
+    font-style: italic;
+    color: var(--info-color);
+}
+
+.message.player {
+    background-color: rgba(72, 187, 120, 0.2);
+}
+
+.message.sender {
+    background-color: rgba(237, 137, 54, 0.2);
+    align-self: flex-end;
+}
+
+.chat-input {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.chat-input input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid var(--bg-light);
+    border-radius: var(--border-radius);
+    background-color: var(--bg-light);
+    color: var(--text-main);
+    font-size: 0.8rem;
+}
+
+.chat-input input:focus {
+    outline: none;
+    border-color: var(--info-color);
+}
+
+.chat-input button {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+}
+
+/* CONTROLES DEL JUEGO */
+.game-controls {
+    background-color: var(--bg-medium);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.control-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    flex: 1;
+}
+
+.control-buttons button {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.game-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.connection-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.connection-indicator.connected {
+    background-color: var(--success-color);
+    animation: pulse 2s infinite;
+}
+
+/* PIEZAS DEL JUEGO */
+.game-piece {
+    width: 85%;
+    height: 85%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    position: relative;
+    font-size: 0.7rem;
+    padding: 2px;
+}
+
+.game-piece:hover {
+    transform: scale(1.05);
+}
+
+.game-piece.player {
+    background: linear-gradient(135deg, var(--info-color), #2c5282);
+    color: white;
+    border: 2px solid #63b3ed;
+}
+
+.game-piece.opponent {
+    background: linear-gradient(135deg, var(--accent-color), #9b2c2c);
+    color: white;
+    border: 2px solid #fc8181;
+}
+
+.game-piece.revealed {
+    border-width: 3px;
+}
+
+.game-piece .piece-symbol {
+    font-size: 1rem;
+    margin-bottom: 2px;
+}
+
+.game-piece .piece-rank {
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.game-piece .piece-name {
+    font-size: 0.6rem;
+    text-align: center;
+    margin-top: 2px;
+    display: none;
+}
+
+.game-piece.revealed .piece-name {
+    display: block;
+}
+
+.game-piece.flag {
+    background: linear-gradient(135deg, #d69e2e, #744210);
+    border-color: #ecc94b;
+}
+
+.game-piece.bomb {
+    background: linear-gradient(135deg, #718096, #2d3748);
+    border-color: #a0aec0;
+}
+
+/* LEYENDA DEL TABLERO */
+.board-legend {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.5rem;
+    background-color: var(--bg-light);
+    border-radius: var(--border-radius);
+}
+
+.legend-item::before {
+    content: '';
+    width: 15px;
+    height: 15px;
+    border-radius: 3px;
+}
+
+.legend-item.lake::before {
+    background-color: rgba(66, 153, 225, 0.3);
+    border: 1px solid var(--info-color);
+}
+
+.legend-item.player-territory::before {
+    background-color: rgba(72, 187, 120, 0.1);
+    border: 1px solid var(--success-color);
+}
+
+.legend-item.opponent-territory::before {
+    background-color: rgba(237, 137, 54, 0.1);
+    border: 1px solid var(--warning-color);
+}
+
+/* MODALES */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    background-color: var(--bg-medium);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    border: 2px solid var(--accent-color);
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-footer {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+/* ========== MODAL DE COMBATE MEJORADO ========== */
+.combat-participants {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 1.5rem 0;
+    gap: 1rem;
+}
+
+.participant {
+    flex: 1;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    display: flex;
+    flex-direction: column;
+    min-height: 180px;
+}
+
+.participant.attacker {
+    background: linear-gradient(135deg, rgba(66, 153, 225, 0.15), rgba(32, 107, 185, 0.1));
+    border: 2px solid var(--info-color);
+}
+
+.participant.defender {
+    background: linear-gradient(135deg, rgba(229, 62, 62, 0.15), rgba(185, 32, 32, 0.1));
+    border: 2px solid var(--accent-color);
+}
+
+.participant-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.participant-label {
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: var(--text-main);
+}
+
+.participant-role {
+    font-size: 0.8rem;
+    color: var(--warning-color);
+    background: rgba(214, 158, 46, 0.2);
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+}
+
+.participant-details {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+}
+
+.participant-symbol {
+    font-size: 2.5rem;
+    min-width: 60px;
+    text-align: center;
+}
+
+.participant-info {
+    flex: 1;
+}
+
+.participant-info h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    color: var(--text-main);
+}
+
+.participant-rank {
+    font-size: 0.9rem;
+    color: var(--warning-color);
+    background: rgba(214, 158, 46, 0.1);
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.vs-separator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1rem;
+}
+
+.vs-circle {
+    width: 50px;
+    height: 50px;
+    background: var(--accent-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    box-shadow: 0 0 10px rgba(229, 62, 62, 0.5);
+}
+
+/* Resultado detallado */
+.combat-outcome {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-top: 1rem;
+    padding: 0.8rem;
+    border-radius: var(--border-radius);
+    background-color: var(--bg-light);
+    text-align: center;
+}
+
+.combat-outcome.outcome-victory {
+    color: var(--success-color);
+    background-color: rgba(72, 187, 120, 0.2) !important;
+}
+
+.combat-outcome.outcome-defeat {
+    color: var(--accent-color);
+    background-color: rgba(229, 62, 62, 0.2) !important;
+}
+
+.combat-outcome.outcome-draw {
+    color: var(--warning-color);
+    background-color: rgba(214, 158, 46, 0.2) !important;
+}
+
+.result-details {
+    margin: 1rem 0;
+    padding: 0.8rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--border-radius);
+}
+
+.winner-section, .loser-section, .both-die-section {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+.winner-section {
+    background: rgba(72, 187, 120, 0.2);
+    border-left: 4px solid var(--success-color);
+}
+
+.loser-section {
+    background: rgba(229, 62, 62, 0.2);
+    border-left: 4px solid var(--accent-color);
+}
+
+.both-die-section {
+    background: rgba(214, 158, 46, 0.2);
+    border-left: 4px solid var(--warning-color);
+}
+
+.winner-label, .loser-label, .both-die-label {
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.winner-name, .loser-name, .both-die-name {
+    flex: 1;
+    font-weight: bold;
+}
+
+.winner-symbol, .loser-symbol {
+    font-size: 1.2rem;
+}
+
+/* Caja de explicación */
+.explanation-box {
+    margin: 1rem 0;
+    padding: 0.8rem;
+    background: rgba(66, 153, 225, 0.1);
+    border: 1px solid var(--info-color);
+    border-radius: var(--border-radius);
+}
+
+.explanation-box h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+    color: var(--info-color);
+}
+
+.explanation-text {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* Etiqueta de regla */
+.rule-tag {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    background: var(--bg-light);
+    border: 1px solid var(--warning-color);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    color: var(--warning-color);
+    margin-top: 0.5rem;
+}
+
+/* Contador regresivo */
+.countdown {
+    text-align: center;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-main);
+}
+
+#combat-countdown {
+    font-weight: bold;
+    color: var(--accent-color);
+    font-size: 1.1rem;
+}
+
+/* ========== RESPONSIVE ========== */
+
+/* Para pantallas medianas */
+@media (max-width: 1200px) {
+    .game-main {
+        flex-direction: column;
+    }
+    
+    .game-sidebar {
+        max-width: 100%;
+        flex-direction: row;
+        gap: 1rem;
+    }
+    
+    .game-info-panel, .game-chat {
+        flex: 1;
+        min-width: 0;
+    }
+}
+
+/* Para tablets y móviles grandes */
+@media (max-width: 900px) {
+    .game-container {
+        padding: 0.5rem;
+        gap: 0.5rem;
+    }
+    
+    .game-main {
+        gap: 0.5rem;
+    }
+    
+    .game-board, .game-info-panel, .game-chat {
+        padding: 0.8rem;
+    }
+    
+    .board-full {
+        grid-template-columns: repeat(10, minmax(25px, 1fr));
+        grid-template-rows: repeat(10, minmax(25px, 1fr));
+    }
+    
+    .game-sidebar {
+        flex-direction: column;
+    }
+    
+    .player-stats {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .game-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+    
+    .control-buttons {
+        justify-content: center;
+    }
+    
+    .game-status {
+        justify-content: center;
+    }
+    
+    /* Modal de combate responsive */
+    .combat-participants {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .participant {
+        width: 100%;
+        min-height: 140px;
+    }
+    
+    .vs-separator {
+        padding: 0.5rem 0;
+    }
+    
+    .vs-circle {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    .participant-symbol {
+        font-size: 2rem;
+        min-width: 50px;
+    }
+    
+    .participant-info h3 {
+        font-size: 1rem;
+    }
+}
+
+/* Para móviles */
+@media (max-width: 600px) {
+    .game-container {
+        height: calc(100vh - 60px);
+        padding: 0.25rem;
+    }
+    
+    .game-main {
+        flex-direction: column;
+    }
+    
+    .game-board {
+        min-height: 300px;
+        padding: 0.5rem;
+    }
+    
+    .board-full {
+        min-height: 250px;
+        gap: 1px;
+        padding: 3px;
+    }
+    
+    .board-full-cell {
+        min-height: 15px;
+    }
+    
+    .game-sidebar {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .game-info-panel, .game-chat {
+        padding: 0.5rem;
+        min-height: auto;
+    }
+    
+    .move-history-container {
+        min-height: 120px;
+        max-height: 150px;
+    }
+    
+    .game-chat {
+        min-height: 150px;
+        max-height: 200px;
+    }
+    
+    .player-stats {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.3rem;
+    }
+    
+    .stat-item {
+        padding: 0.3rem;
+    }
+    
+    .stat-value {
+        font-size: 1rem;
+    }
+    
+    .stat-label {
+        font-size: 0.7rem;
+    }
+    
+    .control-buttons {
+        justify-content: center;
+    }
+    
+    .control-buttons button {
+        flex: 1;
+        min-width: 120px;
+        padding: 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .board-legend {
+        font-size: 0.7rem;
+        gap: 0.3rem;
+    }
+    
+    /* Modal de combate en móviles */
+    .modal-content {
+        padding: 1rem;
+    }
+    
+    .participant {
+        min-height: 120px;
+        padding: 0.8rem;
+    }
+    
+    .participant-symbol {
+        font-size: 1.8rem;
+        min-width: 45px;
+    }
+    
+    .participant-info h3 {
+        font-size: 0.9rem;
+    }
+    
+    .participant-rank {
+        font-size: 0.8rem;
+        padding: 0.2rem 0.4rem;
+    }
+    
+    .explanation-box h4 {
+        font-size: 0.8rem;
+    }
+    
+    .explanation-text {
+        font-size: 0.8rem;
+    }
+}
+
+/* Para pantallas muy pequeñas */
+@media (max-width: 400px) {
+    .board-full {
+        grid-template-columns: repeat(10, minmax(20px, 1fr));
+        grid-template-rows: repeat(10, minmax(20px, 1fr));
+    }
+    
+    .game-piece {
+        width: 80%;
+        height: 80%;
+    }
+    
+    .game-piece .piece-symbol {
+        font-size: 0.8rem;
+    }
+    
+    .game-piece .piece-rank {
+        font-size: 0.6rem;
+    }
+    
+    .control-buttons button {
+        min-width: 100px;
+        font-size: 0.7rem;
+        padding: 0.4rem;
+    }
+    
+    .chat-input input {
+        font-size: 0.7rem;
+        padding: 0.4rem;
+    }
+    
+    .chat-input button {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.7rem;
+    }
+    
+    /* Modal de combate en pantallas muy pequeñas */
+    .participant-details {
+        gap: 0.5rem;
+    }
+    
+    .participant-symbol {
+        font-size: 1.5rem;
+        min-width: 40px;
+    }
+    
+    .participant-info h3 {
+        font-size: 0.8rem;
+    }
+    
+    .vs-circle {
+        width: 35px;
+        height: 35px;
+        font-size: 0.9rem;
+    }
+    
+    .modal-content {
+        padding: 0.8rem;
+    }
+}
+
+/* Para pantallas altas y estrechas */
+@media (max-height: 600px) and (min-width: 601px) {
+    .game-container {
+        height: calc(100vh - 60px);
+    }
+    
+    .game-board {
+        min-height: 200px;
+    }
+    
+    .board-full {
+        min-height: 180px;
+    }
+    
+    .move-history-container {
+        max-height: 100px;
+    }
+    
+    .game-chat {
+        max-height: 150px;
+    }
+    
+    /* Modal de combate en pantallas altas */
+    .participant {
+        min-height: 150px;
+    }
+    
+    .participant-symbol {
+        font-size: 2rem;
+    }
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-medium);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent-color);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #c53030;
+}
+
+/* Piezas del oponente ocultas */
+.game-piece.hidden-opponent {
+    background: linear-gradient(135deg, #e53e3e, #9b2c2c) !important;
+    border: 2px solid #fc8181 !important;
+    opacity: 0.9;
+}
+
+.game-piece.hidden-opponent .piece-symbol {
+    font-size: 1.2rem;
+    opacity: 0.8;
+}
+
+.game-piece.hidden-opponent .piece-rank {
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 3px rgba(0,0,0,0.5);
+}
+
+/* Efecto para cuando se revelan las piezas */
+.game-piece.revealed {
+    animation: revealPiece 0.5s ease-out;
+}
+
+@keyframes revealPiece {
+    0% { transform: scale(0.8); opacity: 0.5; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Botón de revelar */
+#reveal-opponent-btn {
+    background: linear-gradient(to bottom, #d69e2e, #b7791f);
+    color: white;
+    border: 2px solid #ecc94b;
+    transition: all 0.3s;
+}
+
+#reveal-opponent-btn:hover:not(:disabled) {
+    background: linear-gradient(to bottom, #ecc94b, #d69e2e);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(214, 158, 46, 0.4);
+}
+
+#reveal-opponent-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background: linear-gradient(to bottom, #38a169, #276749);
+}

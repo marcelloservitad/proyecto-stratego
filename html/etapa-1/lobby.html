@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Stratego - El Club de Oficiales</title>
+    <link rel="stylesheet" href="../../css/etapa-1/lobby.css" />
+</head>
+<body>
+    <header class="app-header">
+        <h1>El Club de Oficiales</h1>
+        <p class="subtitle">Lobby público • Presencia en tiempo real • Chat global</p>
+    </header>
+
+    <main class="app-main">
+        <section class="card" aria-labelledby="sessionTitle">
+            <header class="card-header">
+                <h2 id="sessionTitle">Sesión</h2>
+            </header>
+
+            <article class="card-body">
+                <form id="loginForm" class="form" autocomplete="off">
+                    <label for="usernameInput">Nombre de usuario</label>
+                    <input id="usernameInput" name="username" type="text" minlength="3" maxlength="30"
+                        placeholder="Ej: MariscalSarah" required />
+
+                    <button id="loginButton" type="submit">Entrar</button>
+
+                    <p class="hint">
+                        Reglas: 3–30 caracteres, alfanumérico.
+                    </p>
+                </form>
+
+                <section id="sessionPanel" class="session-panel" aria-live="polite" hidden>
+                    <p>
+                        Conectado como: <strong id="currentUsername">—</strong>
+                    </p>
+                    <p class="muted">
+                        ID de oficial: <span id="currentUserId">—</span>
+                    </p>
+
+                    <button id="logoutButton" type="button">Cerrar sesión</button>
+                </section>
+            </article>
+        </section>
+                <section class="card" aria-labelledby="pveTitle" style="margin-top: 1rem;">
+                    <header class="card-header">
+                        <h2 id="pveTitle">🎮 Entrenamiento PvE</h2>
+                    </header>
+
+                    <article class="card-body">
+                        <p class="muted" style="margin-bottom: 10px;">Selecciona la modalidad:</p>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <select id="pve-mode" style="padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem;">
+                                <option value="classic">🎖️ Guerra Clásica (40 piezas)</option>
+                                <option value="quick">⚡ Duelo Rápido (10 piezas)</option>
+                            </select>
+
+                            <button id="start-pve" type="button" style="background-color: #2ecc71; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                                Iniciar Entrenamiento
+                            </button>
+                        </div>
+                    </article>
+                </section>
+        <section class="grid">
+            <section class="card" aria-labelledby="presenceTitle">
+                <header class="card-header">
+                    <h2 id="presenceTitle">Oficiales conectados</h2>
+                    <p class="muted" id="presenceStatus">Sin conexión.</p>
+                </header>
+
+                <article class="card-body">
+                    <form class="form-inline" autocomplete="off">
+                        <label for="userFilterInput">Filtrar</label>
+                        <input id="userFilterInput" type="text" placeholder="Filtrar oficiales por nombre..." />
+                        <button id="clearFilterButton" type="button">Limpiar</button>
+                    </form>
+
+                    <section class="scroll-panel" aria-label="Lista de oficiales conectados">
+                        <ul id="usersList" class="users-list" aria-live="polite"></ul>
+                    </section>
+                </article>
+            </section>
+
+            <section class="card" aria-labelledby="chatTitle">
+                <header class="card-header">
+                    <h2 id="chatTitle">Chat global</h2>
+                    <p class="muted" id="chatStatus">Sin conexión.</p>
+                </header>
+
+                <article class="card-body">
+                    <section class="scroll-panel" aria-label="Mensajes del chat global">
+                        <ul id="chatList" class="chat-list" aria-live="polite"></ul>
+                    </section>
+
+                    <form id="chatForm" class="chat-form" autocomplete="off">
+                        <label class="sr-only" for="chatInput">Mensaje</label>
+                        <input id="chatInput" name="chat" type="text" maxlength="200"
+                            placeholder="Escribe un mensaje para todos..." disabled />
+                        <button id="chatSendButton" type="submit" disabled>Enviar</button>
+                    </form>
+
+                    <p class="hint">
+                        Este chat es efímero:
+                    </p>
+                </article>
+            </section>
+        </section>
+
+        <section class="toast-region" aria-live="polite" aria-atomic="true">
+            <p id="toast" class="toast" hidden></p>
+        </section>
+    </main>
+
+    <dialog id="challengeDialog" class="dialog">
+        <form method="dialog" class="dialog-card">
+            <header class="dialog-header">
+                <h2 id="challengeTitle">Reto</h2>
+                <p class="muted" id="challengeSubtitle">—</p>
+            </header>
+
+            <section class="dialog-body">
+                <p id="challengeDetails" class="dialog-details">—</p>
+
+                <section id="challengeModePicker" class="dialog-mode" hidden>
+                    <label for="challengeModeSelect">Modo</label>
+                    <select id="challengeModeSelect">
+                        <option value="CLASSIC_WAR">Guerra Clásica (40 piezas)</option>
+                        <option value="QUICK_DUEL">Duelo Rápido (10 piezas)</option>
+                    </select>
+                </section>
+            </section>
+
+            <footer class="dialog-footer">
+                <button id="challengeRejectButton" value="cancel" type="button">Rechazar</button>
+                <button id="challengeAcceptButton" value="ok" type="button">Aceptar</button>
+                <button id="challengeSendButton" value="ok" type="button" hidden>Enviar reto</button>
+            </footer>
+        </form>
+    </dialog>
+
+    <footer class="app-footer">
+        <small>Stratego • Etapa I • Vanilla JavaScript</small>
+    </footer>
+
+    <script type="module" src="../../js/etapa-1/lobby.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+    const btnPve = document.getElementById('start-pve');
+    const selectMode = document.getElementById('pve-mode');
+
+    if (btnPve && selectMode) {
+        btnPve.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // 1. Capturamos el modo elegido ('classic' o 'quick')
+            const mode = selectMode.value;
+            
+            console.log("🚀 Iniciando PvE en modo:", mode);
+
+             localStorage.setItem('mode', mode);
+
+            // 2. REDIRECCIÓN
+            // Enviamos 'mode' y 'offline=true' para que config.html sepa qué cargar.
+            // Asegúrate que la ruta a config.html sea la correcta desde tu carpeta.
+            window.location.href = `/config.html?mode=${mode}&offline=true`;
+        });
+    }
+})
+    </script>
+</body>
+</html>

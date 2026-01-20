@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Stratego - Etapa III: Batalla</title>
+    <link rel="stylesheet" href="../../css/etapa-3/match.css" />
+</head>
+<body class="team-red">
+    <header class="app-header">
+        <h1>Etapa III: Batalla</h1>
+        <p class="subtitle">Las piezas enemigas son incógnitas. El tablero está listo para el combate.</p>
+    </header>
+
+    <main class="app-main">
+        <section class="layout">
+            
+            <section class="card" aria-labelledby="boardTitle">
+                <header class="card-header">
+                    <h2 id="boardTitle">Tablero</h2>
+
+                    <section class="meta" aria-label="Indicadores de partida">
+                        <p class="meta-item">
+                            Protocolo: <strong id="protocolModeText">FETCH_FIRST</strong>
+                        </p>
+                        <p class="meta-item">
+                            Turno: <strong id="turnText">RED</strong>
+                        </p>
+                        <p id="realtimeStatusText" class="hint" aria-live="polite">Conectando...</p>
+                    </section>
+                </header>
+
+                <article class="card-body">
+                    <section class="board" id="board" aria-label="Tablero 10x10"></section>
+
+                    <section class="legend" aria-label="Referencia rápida">
+                        <span class="legend-item"><span class="swatch lake"></span> Lago</span>
+                        <span class="legend-item"><span class="swatch ally"></span> Tus piezas</span>
+                        <span class="legend-item"><span class="swatch enemy"></span> Enemigo</span>
+                    </section>
+                </article>
+            </section>
+
+            <aside class="card" aria-labelledby="sideTitle">
+                <header class="card-header">
+                    <h2 id="sideTitle">Panel de Mando</h2>
+                </header>
+
+                <article class="card-body">
+                    
+                    <section class="panel">
+                        <h3>Marcador</h3>
+                        <p class="muted">Capturas: Tú 0 • Rival 0</p>
+                    </section>
+
+                    <section class="panel legend-panel">
+                        <h3>Guía de Oficiales</h3>
+                        <div class="legend-grid">
+                            <div class="legend-item rank-1" title="Mata a todos excepto al Espía">
+                                <span class="icon">🎖️</span> <span class="name">Mariscal</span> <span class="rank">1</span>
+                            </div>
+                            <div class="legend-item rank-2">
+                                <span class="icon">⭐</span> <span class="name">General</span> <span class="rank">2</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="icon">🦅</span> <span class="name">Coronel</span> <span class="rank">3</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="icon">⚔️</span> <span class="name">Mayor</span> <span class="rank">4</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="icon">🛡️</span> <span class="name">Capitán</span> <span class="rank">5</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="icon">⚜️</span> <span class="name">Teniente</span> <span class="rank">6</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="icon">🔰</span> <span class="name">Sargento</span> <span class="rank">7</span>
+                            </div>
+                            
+                            <div class="legend-item special" title="Desactiva Bombas">
+                                <span class="icon">⛏️</span> <span class="name">Minero</span> <span class="rank">8</span>
+                            </div>
+                            <div class="legend-item special" title="Mueve sin límite">
+                                <span class="icon">👁️</span> <span class="name">Explorador</span> <span class="rank">9</span>
+                            </div>
+                            <div class="legend-item special" title="Mata al Mariscal si ataca primero">
+                                <span class="icon">🕵️</span> <span class="name">Espía</span> <span class="rank">S</span>
+                            </div>
+                            
+                            <div class="legend-item item-bomb">
+                                <span class="icon">💣</span> <span class="name">Bomba</span> <span class="rank">B</span>
+                            </div>
+                            <div class="legend-item item-flag">
+                                <span class="icon">🏁</span> <span class="name">Bandera</span> <span class="rank">F</span>
+                            </div>
+                            <div class="legend-item item-water">
+                                <span class="icon">🌊</span> <span class="name">Lago / Mar</span> <span class="rank">-</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="panel">
+                        <h3>Chat privado</h3>
+                        <div class="chat-wrapper">
+                            <div class="chat-box" id="chat-messages-area" aria-label="Mensajes de chat">
+                                <p class="chat-muted">Conectando chat...</p>
+                            </div>
+
+                            <form class="chat-form" aria-label="Enviar mensaje">
+                                <label class="sr-only" for="chatInput">Mensaje</label>
+                                <input id="chatInput" type="text" placeholder="Escribe un mensaje…" autocomplete="off"/>
+                                <button type="button" id="chatSendBtn">Enviar</button>
+                            </form>
+                        </div>
+                    </section>
+
+                    <section class="panel">
+                        <h3>Acciones</h3>
+                        <button type="button" id="btnForfeit" class="forfeit-button"> 🏳️ RENDIRSE / ABANDONAR </button>
+                        <p class="hint">Declararás tu derrota inmediata.</p>
+                    </section> 
+
+                </article>
+            </aside>
+        </section>
+    </main>
+
+    <div id="modal-combate" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 id="modal-titulo" class="modal-title">RESULTADO</h2>
+            
+            <div class="duelo-area">
+                <div id="card-atk" class="fighter-card">
+                    <span class="badge-rol">ATACANTE</span>
+                    <div id="icon-atk" class="emoji-grande">❓</div>
+                    <div id="rank-atk" class="rango-grande">-</div>
+                </div>
+
+                <div class="vs-text">VS</div>
+
+                <div id="card-def" class="fighter-card">
+                    <span class="badge-rol">DEFENSOR</span>
+                    <div id="icon-def" class="emoji-grande">❓</div>
+                    <div id="rank-def" class="rango-grande">-</div>
+                </div>
+            </div>
+
+            <p id="modal-desc" class="modal-description">Calculando resultado...</p>
+        </div>
+    </div>
+    <footer class="app-footer">
+        <small>Stratego • Etapa III • Batalla</small>
+    </footer>
+
+    <script src="../../js/etapa-3/match.js"></script>
+    <script src="../../js/etapa-3/chat_ws.js"></script> 
+</body>
+</html>

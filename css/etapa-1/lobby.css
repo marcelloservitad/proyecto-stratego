@@ -1,0 +1,315 @@
+:root {
+    --border: #e5e7eb;
+    --text: #111827;
+    --muted: #6b7280;
+    --bg: #f9fafb;
+    --card: #ffffff;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+}
+
+.app-header,
+.app-footer {
+    padding: 16px;
+    text-align: center;
+}
+
+.app-header h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.subtitle {
+    margin: 8px 0 0 0;
+    color: var(--muted);
+}
+
+.app-main {
+    width: min(1100px, 100%);
+    margin: 0 auto;
+    padding: 16px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+@media (min-width: 900px) {
+    .grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.card {
+    border: 1px solid var(--border);
+    background: var(--card);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.card-header h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.card-body {
+    padding: 16px;
+}
+
+.muted {
+    color: var(--muted);
+    margin: 8px 0 0 0;
+    word-break: break-word;
+}
+
+.form {
+    display: grid;
+    gap: 10px;
+}
+
+label {
+    font-weight: 600;
+}
+
+input {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+button {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    background: #111827;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.hint {
+    margin: 6px 0 0 0;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.session-panel {
+    display: grid;
+    gap: 10px;
+}
+
+.users-list,
+.chat-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 10px;
+}
+
+.users-list li,
+.chat-list li {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 12px;
+}
+
+.user-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.badge {
+    font-size: 12px;
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--muted);
+}
+
+.chat-form {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.toast-region {
+    position: fixed;
+    inset: auto 16px 16px auto;
+}
+
+.toast {
+    margin: 0;
+    border: 1px solid var(--border);
+    background: var(--card);
+    border-radius: 12px;
+    padding: 10px 12px;
+    min-width: 260px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+}
+
+.form-inline {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.scroll-panel {
+    max-height: 360px;
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px;
+    background: #ffffff;
+}
+
+.users-list,
+.chat-list {
+    gap: 10px;
+}
+
+.chat-list li p {
+    margin: 0 0 6px 0;
+}
+
+@media (max-width: 520px) {
+    .form-inline {
+        grid-template-columns: 1fr;
+    }
+}
+
+.chat-bubble {
+    display: grid;
+    gap: 6px;
+}
+
+.chat-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.chat-content {
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.chat-message {
+    max-width: 92%;
+}
+
+.chat-message.own {
+    margin-left: auto;
+    border: 1px solid var(--border);
+    background: #f3f4f6;
+}
+
+.chat-message.other {
+    margin-right: auto;
+    border: 1px solid var(--border);
+    background: #ffffff;
+}
+
+.dialog::backdrop {
+    background: rgba(0, 0, 0, 0.35);
+}
+
+.dialog {
+    border: none;
+    padding: 0;
+    width: min(520px, 95vw);
+    border-radius: 16px;
+}
+
+.dialog-card {
+    border: 1px solid var(--border);
+    background: var(--card);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.dialog-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.dialog-header h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.dialog-body {
+    padding: 16px;
+    display: grid;
+    gap: 12px;
+}
+
+.dialog-details {
+    margin: 0;
+}
+
+.dialog-mode {
+    display: grid;
+    gap: 8px;
+}
+
+select {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+.dialog-footer {
+    padding: 14px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+#challengeRejectButton {
+    background: #ffffff;
+    color: #111827;
+}
+
