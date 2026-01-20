@@ -1,0 +1,453 @@
+:root {
+    --border: #e5e7eb;
+    --text: #111827;
+    --muted: #6b7280;
+    --bg: #f9fafb;
+    --card: #ffffff;
+    --lake: #dbeafe;
+    --ally: #fee2e2; /* red default */
+    --enemy: #f3f4f6;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+}
+
+body.team-blue {
+    --ally: #e0f2fe;
+}
+
+.app-header,
+.app-footer {
+    padding: 16px;
+    text-align: center;
+}
+
+.app-header h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.subtitle {
+    margin: 8px 0 0 0;
+    color: var(--muted);
+}
+
+.app-main {
+    width: min(1200px, 100%);
+    margin: 0 auto;
+    padding: 16px;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+@media (min-width: 1000px) {
+    .layout {
+        grid-template-columns: 1.3fr 0.7fr;
+        align-items: start;
+    }
+}
+
+.card {
+    border: 1px solid var(--border);
+    background: var(--card);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.card-header h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.card-body {
+    padding: 16px;
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.meta-item {
+    margin: 0;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+    width: min(640px, 100%);
+    aspect-ratio: 1 / 1;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.cell {
+    border: 1px solid var(--border);
+    background: #ffffff;
+    padding: 0;
+    margin: 0;
+    position: relative;
+}
+
+.cell.lake {
+    background: var(--lake);
+}
+
+.cell.ally-zone {
+    background: var(--ally);
+}
+
+.cell.enemy-zone {
+    background: var(--enemy);
+}
+
+.piece {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    font-weight: 900;
+    font-size: 14px;
+}
+
+.ally-piece {
+    color: #111827;
+}
+
+.enemy-hidden {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    width: 80%;
+    height: 80%;
+    background: #111827;
+    color: #ffffff;
+}
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 12px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.swatch {
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+
+.swatch.lake {
+    background: var(--lake);
+}
+
+.swatch.ally {
+    background: var(--ally);
+}
+
+.swatch.enemy {
+    background: var(--enemy);
+}
+
+.panel {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px;
+    display: grid;
+    gap: 10px;
+}
+
+.panel h3 {
+    margin: 0;
+    font-size: 14px;
+}
+
+.muted {
+    margin: 0;
+    color: var(--muted);
+}
+
+.chat-box {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px;
+    background: #ffffff;
+    height: 220px;
+    overflow: auto;
+}
+
+.chat-muted {
+    margin: 0;
+    color: var(--muted);
+}
+
+.chat-form {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+input {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+
+button {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    background: #111827;
+    color: #ffffff;
+    font-weight: 800;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.forfeit-button {
+    background: #ffffff;
+    color: #111827;
+}
+
+.hint {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+.cell.selected {
+    outline: 3px solid #111827;
+    outline-offset: -3px;
+}
+
+.cell.move-target {
+    box-shadow: inset 0 0 0 3px #10b981;
+}
+
+.cell.attack-target {
+    box-shadow: inset 0 0 0 3px #ef4444;
+}
+
+.reveal-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 9999;
+}
+
+.reveal-modal.open {
+    display: flex;
+}
+
+.reveal-card {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px 16px;
+    width: min(420px, 100%);
+    text-align: center;
+    font-weight: 800;
+}
+
+.piece, .piece-count {
+    font-size: 1.5rem; /* Tamaño del emoji */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: 1;
+}
+
+/* Opcional: Para que en el inventario se vea bonito el chip */
+.piece-chip .piece-count {
+    font-size: 1.8rem; /* Un poco más grande en la lista de selección */
+}
+
+/* --- LEYENDA FIJA EN HTML --- */
+.legend-panel {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.legend-panel h3 {
+    margin: 0 0 10px 0;
+    font-size: 0.9rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #444;
+    padding-bottom: 5px;
+}
+
+.legend-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Dos columnas para ahorrar espacio */
+    gap: 6px;
+    font-size: 0.8rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #2a2a2a;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: #ddd;
+    border: 1px solid #333;
+    cursor: help; /* Muestra ? al pasar el mouse */
+}
+
+.legend-item:hover {
+    background: #333;
+    border-color: #555;
+}
+
+/* Icono y Nombre alineados a la izquierda */
+.legend-item .icon { margin-right: 6px; font-size: 1rem; }
+.legend-item .name { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Rango alineado a la derecha y destacado */
+.legend-item .rank {
+    font-weight: bold;
+    color: #aaa;
+    background: #111;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: monospace;
+}
+
+/* Colores Específicos para Jerarquía */
+.rank-1 .rank, .rank-2 .rank { color: #f1c40f; border: 1px solid #f1c40f; } /* Oro */
+.item-bomb .rank { color: #e74c3c; } /* Rojo */
+.item-flag .rank { color: #3498db; } /* Azul */
+.item-water { background: #1a2634; border-color: #2c3e50; } /* Tono azulado para el agua */
+
+/* Ajuste para pantallas pequeñas */
+@media (max-width: 1200px) {
+    .legend-grid {
+        grid-template-columns: 1fr; /* Una columna si la pantalla es estrecha */
+    }
+}
+
+/* --- ESTILOS DEL MODAL DE COMBATE --- */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.9); /* Fondo oscuro */
+    z-index: 10000; /* Siempre encima de todo */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(5px); /* Efecto borroso de fondo */
+}
+
+.modal-overlay.hidden {
+    opacity: 0;
+    pointer-events: none; /* No bloquea clicks cuando está oculto */
+}
+
+.modal-content {
+    background: #1e1e1e;
+    border: 2px solid #444;
+    padding: 2rem;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 0 50px rgba(255, 0, 0, 0.2);
+    min-width: 320px;
+    transform: scale(1);
+    transition: transform 0.3s;
+}
+
+.modal-title {
+    font-size: 2.5rem;
+    margin: 0 0 1rem 0;
+    font-weight: 800;
+    text-transform: uppercase;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+.duelo-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.fighter-card {
+    background: #2a2a2a;
+    padding: 1rem;
+    border-radius: 10px;
+    width: 110px;
+    border: 3px solid transparent; /* Para pintar borde verde/rojo */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Estados de victoria/derrota */
+.fighter-card.winner { border-color: #2ecc71; box-shadow: 0 0 15px #2ecc71; transform: scale(1.1); }
+.fighter-card.loser { border-color: #e74c3c; opacity: 0.5; filter: grayscale(1); }
+
+.badge-rol { font-size: 0.7rem; color: #888; letter-spacing: 1px; margin-bottom: 5px; }
+.emoji-grande { font-size: 3.5rem; }
+.rango-grande { font-size: 1.5rem; font-weight: bold; color: #f1c40f; margin-top: 5px; }
+.vs-text { font-size: 2rem; font-weight: 900; color: #555; font-style: italic; }
+.modal-description { font-size: 1.1rem; color: #ccc; }

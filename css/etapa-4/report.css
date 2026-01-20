@@ -1,0 +1,184 @@
+/* Heredamos variables y reset del sistema de diseño del Lobby */
+:root {
+    --border: #e5e7eb;
+    --text: #111827;
+    --muted: #6b7280;
+    --bg: #f9fafb;
+    --card: #ffffff;
+    --success: #10b981; /* Verde victoria */
+    --danger: #ef4444;  /* Rojo derrota */
+    --info: #3b82f6;    /* Azul */
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+}
+
+/* --- ESTRUCTURA GENERAL (Igual al Lobby) --- */
+.app-header, .app-footer { padding: 16px; text-align: center; }
+.app-header h1 { margin: 0; font-size: 24px; }
+.subtitle { margin: 8px 0 0 0; color: var(--muted); }
+.app-main { width: min(1100px, 100%); margin: 0 auto; padding: 16px; }
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+@media (min-width: 900px) {
+    .grid { grid-template-columns: 1fr 1fr; }
+}
+
+.column-stack { display: grid; gap: 16px; align-content: start; }
+
+/* --- TARJETAS --- */
+.card {
+    border: 1px solid var(--border);
+    background: var(--card);
+    border-radius: 16px;
+    overflow: hidden;
+}
+.card-header { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.card-header h2 { margin: 0; font-size: 18px; }
+.card-body { padding: 16px; }
+.muted { color: var(--muted); margin: 0; font-size: 14px;}
+.hint { margin: 8px 0 0 0; color: var(--muted); font-size: 12px; }
+
+/* --- RESULTADOS ESPECÍFICOS --- */
+.outcome-banner {
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+}
+
+.outcome-banner.victory {
+    background-color: #ecfdf5;
+    color: #047857;
+    border-color: #a7f3d0;
+}
+
+.outcome-banner.defeat {
+    background-color: #fef2f2;
+    color: #b91c1c;
+    border-color: #fecaca;
+}
+
+.outcome-banner.pending {
+    background-color: #f3f4f6;
+    color: var(--muted);
+    border-color: var(--border);
+}
+
+.details-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 12px;
+}
+
+.details-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+}
+.details-list li:last-child { border-bottom: none; }
+
+/* --- ESTADÍSTICAS --- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px;
+    background: #f9fafb;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+.stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-value { font-size: 24px; font-weight: 700; margin-top: 4px; }
+
+/* --- CHAT (Adaptado al visual del Lobby) --- */
+.scroll-panel {
+    height: 250px; /* Altura fija para el reporte */
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.chat-form {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+input {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 14px;
+    width: 100%;
+}
+
+button {
+    padding: 10px 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    background: #ffffff;
+    color: var(--text);
+    transition: all 0.2s;
+}
+
+/* --- BOTONES DE ACCIÓN --- */
+.actions-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.primary-action {
+    background: #111827;
+    color: #ffffff;
+    border: 1px solid #111827;
+    padding: 12px;
+    font-size: 16px;
+}
+.primary-action:hover { opacity: 0.9; }
+
+.secondary-action {
+    background: #ffffff;
+    color: #111827;
+    border: 1px solid var(--border);
+    padding: 12px;
+    font-size: 16px;
+}
+.secondary-action:hover { background: #f9fafb; }
+
+button:disabled { opacity: 0.6; cursor: not-allowed; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
