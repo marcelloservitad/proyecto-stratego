@@ -5,7 +5,7 @@ let currentFormation = null;
 let playerReady = false;
 let opponentReady = false;
 
-// Inicializar configuración
+// Configura el tablero de despliegue, inventario de piezas y eventos para la preparación de la batalla
 function initializeConfig() {
     // Cargar estado del juego
     loadGameState();
@@ -34,6 +34,7 @@ function initializeConfig() {
     loadSavedFormationsToSelector();
 }
 
+// Carga el estado del juego desde localStorage
 function loadGameState() {
     const savedGame = localStorage.getItem('current_game');
     if (savedGame) {
@@ -119,6 +120,7 @@ function createPieceElement(piece) {
     return div;
 }
 
+// Configura los eventos globales de drag and drop
 function setupDragAndDrop() {
     // Configurar eventos globales
     document.addEventListener('dragover', (e) => {
@@ -130,27 +132,32 @@ function setupDragAndDrop() {
     });
 }
 
+// Maneja el inicio del arrastre de una pieza
 function handleDragStart(e) {
     draggedPieceId = e.currentTarget.id;
     e.dataTransfer.setData('text/plain', draggedPieceId);
     e.currentTarget.classList.add('dragging');
 }
 
+// Limpia el estado después de arrastrar
 function handleDragEnd(e) {
     e.currentTarget.classList.remove('dragging');
     draggedPieceId = null;
 }
 
+// Permite el soltado al prevenir el comportamiento por defecto
 function handleDragOver(e) {
     e.preventDefault();
 }
 
+// Resalta la celda cuando una pieza arrastrada entra en ella
 function handleDragEnter(e) {
     if (e.currentTarget.classList.contains('valid')) {
         e.currentTarget.classList.add('drag-over');
     }
 }
 
+// Quita el resaltado de la celda cuando la pieza sale
 function handleDragLeave(e) {
     e.currentTarget.classList.remove('drag-over');
 }
@@ -271,26 +278,26 @@ function setupConfigEventListeners() {
 
 /**
  * Distribuye todas las piezas en el tablero de forma aleatoria.
- * Utiliza el algoritmo Fisher-Yates para garantizar aleatoriedad real.
+ 
  */
 function randomizeDeployment() {
-    // 1. Limpiamos posiciones previas de TODAS las piezas para empezar de cero
+    //  Limpiamos posiciones previas de TODAS las piezas para empezar de cero
     pieceInventory.pieces.forEach((piece) => {
         piece.position = null;
     });
 
-    // 2. Obtenemos todas las piezas y todas las celdas del tablero
+    //  Obtenemos todas las piezas y todas las celdas del tablero
     const allPieces = pieceInventory.pieces;
     const allCells = Array.from(document.querySelectorAll('.board-cell.valid'));
 
-    // 3. Mezclamos el array de celdas usando Fisher-Yates
+    //  Mezclamos el array de celdas 
     for (let i = allCells.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         // Intercambio de elementos (Destructuring assignment)
         [allCells[i], allCells[j]] = [allCells[j], allCells[i]];
     }
 
-    // 4. Asignamos cada pieza a una celda mezclada
+    //  Asignamos cada pieza a una celda mezclada
     allPieces.forEach((piece, index) => {
         if (index < allCells.length) {
             const cell = allCells[index];
@@ -301,7 +308,7 @@ function randomizeDeployment() {
         }
     });
 
-    // 5. Refrescamos la interfaz
+    //  Refrescamos la interfaz
     updateBoardDisplay();
     renderPieceInventory();
     checkDeploymentComplete();
@@ -517,6 +524,7 @@ function closeFormationsModal() {
     if (modal) modal.classList.add('hidden');
 }
 
+// Alterna el estado de listo del jugador y gestiona la respuesta del bot
 function toggleReady() {
     if (!pieceInventory.isDeploymentComplete()) {
         alert('¡Debes colocar todas las piezas primero!');
@@ -554,6 +562,7 @@ function toggleReady() {
     }
 }
 
+// Actualiza la interfaz con el estado de listo del jugador y oponente
 function updateReadyStatus() {
     const playerStatus = document.getElementById('player-status');
     const opponentStatus = document.getElementById('opponent-status');
@@ -576,6 +585,7 @@ function updateReadyStatus() {
     }
 }
 
+// Guarda el despliegue final en localStorage y prepara el inicio de la batalla
 function saveFinalDeployment() {
     const deployment = {
         gameId: AppState.currentGame.id,
@@ -598,6 +608,7 @@ function saveFinalDeployment() {
     localStorage.setItem('current_game', JSON.stringify(AppState.currentGame));
 }
 
+// Verifica si todas las piezas están colocadas y habilita el botón de listo
 function checkDeploymentComplete() {
     const isComplete = pieceInventory.isDeploymentComplete();
     const readyBtn = document.getElementById('ready-btn');
@@ -606,6 +617,7 @@ function checkDeploymentComplete() {
     }
 }
 
+// Actualiza la información del juego y oponente en la interfaz
 function updateGameInfo() {
     const gameModeDisplay = document.getElementById('game-mode-display');
     const opponentInfo = document.getElementById('opponent-info');
@@ -622,6 +634,7 @@ function updateGameInfo() {
     }
 }
 
+// Muestra el protocolo de comunicación activo en la interfaz
 function updateProtocolDisplay() {
     const mainProtocol = document.getElementById('main-protocol');
     const secondaryProtocol = document.getElementById('secondary-protocol');
