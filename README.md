@@ -1,4 +1,4 @@
-tratego - Proyecto Final
+Stratego - Proyecto Final
 Este repositorio contiene la implementación web del juego de mesa Stratego, desarrollada utilizando HTML5, CSS3 y Vanilla JavaScript modular.
 📋 Requisitos Previos
 ● Visual Studio Code (Editor recomendado).
