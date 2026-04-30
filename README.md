@@ -1,8 +1,10 @@
 Stratego - Proyecto Final
 Este repositorio contiene la implementación web del juego de mesa Stratego, desarrollada utilizando HTML5, CSS3 y Vanilla JavaScript modular.
+
 📋 Requisitos Previos
 ● Visual Studio Code (Editor recomendado).
 ● Git (Para clonar el repositorio).
+
 🚀 Instrucciones de Instalación y Ejecución
 Para la correcta evaluación del proyecto y el funcionamiento de los módulos de JavaScript y conexiones, siga estos pasos estrictamente:
 1. Clonar el repositorio: Descargue o clone este repositorio en su máquina local.
